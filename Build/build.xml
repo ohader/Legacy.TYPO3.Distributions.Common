@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ * This script belongs to the TYPO3 v4 build system.                      *
+ *                                                                        *
+ * It is free software; you can redistribute it and/or modify it under    *
+ * the terms of the GNU Lesser General Public License as published by the *
+ * Free Software Foundation, either version 3 of the License, or (at your *
+ * option) any later version.                                             *
+ *                                                                        *
+ * This script is distributed in the hope that it will be useful, but     *
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHAN-    *
+ * TABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser       *
+ * General Public License for more details.                               *
+ *                                                                        *
+ * You should have received a copy of the GNU Lesser General Public       *
+ * License along with the script.                                         *
+ * If not, see http://www.gnu.org/licenses/lgpl.html                      *
+ *                                                                        *
+ * The TYPO3 project - inspiring people to share!                         *
+-->
+<project name="TYPO3v4Common" basedir="." default="common">
+	<taskdef file="${project.basedir}/Common/Tasks.properties" />
+
+	<property name="git.remoteRepository" value="git://git.typo3.org/TYPO3v4/Core.git" />
+	<property name="project.targetsDirectory" value="${project.basedir}/Targets/" />
+	<property name="project.workDirectory" value="${project.basedir}/Work/" />
+	<property name="project.localRepositoryDirectory" value="${project.basedir}/Work/Core.git/" />
+	<property name="project.resourcesDirectory" value="${project.basedir}/Resources/" />
+	<property name="project.typo3VersionFile" value="t3lib/config_default.php" />
+
+	<exec logoutput="false" checkreturn="true" command="git --exec-path" outputProperty="project.gitPath" />
+	<property name="project.gitPath" value="${project.gitPath}/git" override="true" />
+
+	<tstamp>
+		<format property="common.date" pattern="%Y%m%d" />
+	</tstamp>
+
+	<target name="common">
+		<propertyprompt propertyName="common.type" defaultValue="snapshot" useExistingValue="true"
+			promptText="Type of the release (snapshot, regular, alpha, beta, rc)" />
+		<propertyprompt propertyName="common.major" defaultValue="" useExistingValue="true"
+			promptText="Major version of the release (4.2, 4.3, 4.4, 4.5, 4.6, 4.7)" />
+
+		<phingcall target="repository-clone" />
+
+		<typo3convertversion value="${common.major}" type="branch" property="common.branch" />
+
+		<typo3gitinfo
+			branch="${common.branch}"
+			type="${common.type}"
+			property="common.info"
+			gitPath="${project.gitPath}"
+			repository="${project.localRepositoryDirectory}" />
+
+		<echo message="nextVersion: ${common.info.nextVersion}" />
+		<echo message="nextTag: ${common.info.nextTag}" />
+		<echo message="currentVersion: ${common.info.currentVersion}" />
+		<echo message="currentTag: ${common.info.currentTag}" />
+		<echo message="branchName: ${common.info.branchName}" />
+		<echo message="successorVersion: ${common.info.successorVersion}" />
+	</target>
+
+	<target name="project-md5">
+		<typo3filehash dir="${project.targetsDirectory}" returnProperty="project-md5.result" method="md5" />
+		<echo message="${project-md5.result}" />
+	</target>
+
+	<target name="project-initialize">
+		<delete dir="${project.targetsDirectory}" quiet="true" />
+		<mkdir dir="${project.targetsDirectory}" />
+	</target>
+
+	<target name="project-permissions">
+		<fail unless="project-permissions.directory" message="You must set the $project-permissions.directory for this target" />
+
+		<!-- fix file permissions and make some files executable -->
+		<!-- Change ownership -->
+		<chown user="root" quiet="true" verbose="false">
+			<fileset dir="${project-permissions.directory}" />
+		</chown>
+
+		<!-- Set readonly permissions for everyone except the owner -->
+		<chmod mode="0755" quiet="true" verbose="false">
+			<fileset dir="${project-permissions.directory}" />
+		</chmod>
+
+		<!-- files should not remain executable -->
+		<exec command="find ${project-permissions.directory} -type f | xargs chmod a-x" />
+
+		<!--  ... except those listed in EXEC_FILES -->
+		<chmod mode="0755" quiet="true" verbose="false">
+			<!-- Files that must be made executable -->
+			<fileset dir="${project-permissions.directory}">
+				<include name="*.phpcron" />
+				<include name="*.phpsh" />
+				<include name="*.sh" />
+				<include name="*.pl" />
+			</fileset>
+		</chmod>
+	</target>
+
+	<target name="repository-export">
+		<fail unless="repository-export.gitName" message="Property $repository-export.gitName is required." />
+		<fail unless="repository-export.filePath" message="Property $repository-export.filePath is required." />
+		<fail unless="repository-export.directory" message="Propery $repository-export.directory is required." />
+
+		<delete dir="${repository-export.directory}" quiet="true" />
+		<mkdir dir="${repository-export.directory}" />
+
+		<exec logoutput="true" checkreturn="true"
+			command="git archive --format=zip --remote=${git.remoteRepository} ${repository-export.gitName} -o ${repository-export.filePath}" />
+
+		<!-- extract base file of source -->
+		<unzip file="${repository-export.filePath}" todir="${repository-export.directory}">
+			<!-- clean up files from VCS -->
+			<fileset dir="${repository-export.directory}">
+				<exclude name="src" />
+				<exclude name="tests" />
+				<exclude name="CVS" />
+				<exclude name="SVNreadme.txt" />
+				<exclude name=".svn" />
+				<exclude name="*.webprj" />
+				<exclude name="*.orig" />
+				<exclude name="*~" />
+			</fileset>
+		</unzip>
+
+		<delete file="${repository-export.filePath}" quiet="true"/>
+	</target>
+
+
+	<target name="repository-clone">
+		<available file="${project.localRepositoryDirectory}.git" type="dir" property="repository-clone.exists" />
+		<if>
+			<not><isset property="repository-clone.exists" /></not>
+			<then>
+				<delete dir="${project.localRepositoryDirectory}" quiet="true" />
+				<mkdir dir="${project.localRepositoryDirectory}" />
+
+				<exec logoutput="true" checkreturn="true"
+					command="git clone ${git.remoteRepository} ${project.localRepositoryDirectory}" />
+				<!--
+				<gitclone
+					gitPath="${project.gitPath}"
+					repository="${git.remoteRepository}"
+					targetPath="${project.localRepositoryDirectory}" />
+				-->
+			</then>
+			<else>
+				<exec logoutput="true" checkreturn="true"
+					dir="${project.localRepositoryDirectory}"
+					command="git pull" />
+				<!--
+				<gitpull repository="${git.remoteRepository}" gitPath="${project.gitPath}" />
+				-->
+			</else>
+		</if>
+	</target>
+
+	<target name="repository-select" depends="repository-clone">
+		<fail unless="repository-select.branch" message="Property $repository-select.branch is required." />
+
+		<gitcheckout
+			gitPath="${project.gitPath}"
+			repository="${project.localRepositoryDirectory}"
+			branchname="${repository-select.branch}" />
+	</target>
+
+	<target name="repository-typo3-tag">
+		<fail unless="repository-typo3-tag.tag" message="Property $repository-typo3-tag.tag is required." />
+		<fail unless="repository-typo3-tag.branch" message="Property $repository-typo3-tag.branch is required." />
+		<fail unless="repository-typo3-tag.version" message="Property $repository-typo3-tag.version is required." />
+	
+		<phingcall target="repository-select">
+			<property name="repository-select.branch" value="${repository-typo3-tag.branch}" />
+		</phingcall>
+
+		<gittag
+			gitPath="${project.gitPath}"
+			repository="${project.localRepositoryDirectory}"
+			name="${repository-typo3-tag.tag}"
+			commit="Tagged version ${repository-typo3-tag.version}"
+			annotate="true" />
+		<gitpush
+			gitPath="${project.gitPath}"
+			repository="${project.localRepositoryDirectory}"
+			refspec="HEAD:refs/tags/${repository-typo3-tag.tag}" />
+	</target>
+
+	<target name="repository-typo3-version">
+		<fail unless="repository-typo3-version.set" message="Property $repository-typo3-version.set is required." />
+		<fail unless="repository-typo3-version.branch" message="Property $repository-typo3-version.branch is required." />
+
+		<phingcall target="repository-select">
+			<property name="repository-select.branch" value="${repository-typo3-version.branch}" />
+		</phingcall>
+
+		<phingcall target="typo3-version">
+			<property name="typo3-version.set" value="${repository-typo3-version.set}" />
+			<property name="typo3-version.directory" value="${project.localRepositoryDirectory}" />
+		</phingcall>
+
+		<exec logoutput="true" checkreturn="true"
+			dir="${project.localRepositoryDirectory}"
+			command="git commit ${project.typo3VersionFile} -m 'Changing TYPO3 version to ${repository-typo3-version.set}'" />
+		<gitpush
+			gitPath="${project.gitPath}"
+			repository="${project.localRepositoryDirectory}"
+			refspec="HEAD:refs/fors/${repository-typo3-version.branch}" />
+	</target>
+
+	<target name="typo3-version">
+		<fail unless="typo3-version.set" message="Property $repository-typo3-version.set is required." />
+		<fail unless="typo3-version.directory" message="Property $repository-typo3-version.directory is required" />
+
+		<property name="typo3-version.filePath" value="${typo3-version.directory}${project.typo3VersionFile}" />
+
+		<move file="${typo3-version.filePath}" tofile="${typo3-version}.modified">
+			<filterchain>
+				<replaceregexp>
+					<regexp pattern="(\$TYPO_VERSION = )\'[^\']+" replace="$1'${typo3-version.set}" />
+				</replaceregexp>
+			</filterchain>
+		</move>
+		<move file="${typo3-version.filePath}.modified" tofile="${typo3-version.filePath}" />
+	</target>
+
+	<!--
+		publishes the existing archives to sourceforge
+		watch it: untested, and the folder structure is still unclear
+	-->
+	<target name="publish-sourceforge" description="Upload existing archives of the TYPO3 source to SourceForce">
+		<fail unless="publish-sourceforge.directory" message="Property $publish-sourceforge.name is required." />
+		<typo3convertwhitespaces property="publish-sourceforge.directory" />
+		<echo message="${publish-sourceforge.directory}" />
+
+		<!-- the only way to create a folder via ssh, thanks FLOW3 -->
+		<exec logoutput="true" checkreturn="true" command="ssh shell.sourceforge.net create" />
+		<!-- <exec logoutput="true" checkreturn="true" command="ssh shell.sourceforge.net mkdir -p '/home/frs/project/t/ty/typo3/TYPO3 Source and Dummy/${publish-sourceforge.directory}'" /> -->
+		<exec logoutput="true" checkreturn="true" command="ssh shell.sourceforge.net mkdir -p '/home/frs/project/t/ty/typo3/TYPO3v4Testing/${publish-sourceforge.directory}'" />
+		<exec logoutput="true" checkreturn="true" command="ssh shell.sourceforge.net shutdown" />
+		<!-- <exec logoutput="true" checkreturn="true" command="scp ${project.baseDirectory}{baseName}.* 'frs.sourceforge.net:/home/frs/project/t/ty/typo3/TYPO3 Source and Dummy/${publish-sourceforge.directory}/'" /> -->
+		<exec logoutput="true" checkreturn="true" command="scp ${project.targetsDirectory}* frs.sourceforge.net:'/home/frs/project/t/ty/typo3/TYPO3v4Testing/${publish-sourceforge.directory}/'" />
+	</target>
+</project>
