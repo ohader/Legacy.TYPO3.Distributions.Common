@@ -22,11 +22,14 @@
 	<taskdef file="${project.basedir}/Common/Tasks.properties" />
 
 	<property name="git.remoteRepository" value="git://git.typo3.org/TYPO3v4/Core.git" />
+	<property name="git.commitHookCommand" value="scp -p -P 29418 review.typo3.org:hooks/commit-msg .git/hooks/" />
+	<property name="git.pushUrl" value="ssh://review.typo3.org/TYPO3v4/Core.git" />
+	<property name="git.pushTarget" value="/RELEASE-TEST" />
 	<property name="project.targetsDirectory" value="${project.basedir}/Targets/" />
 	<property name="project.workDirectory" value="${project.basedir}/Work/" />
 	<property name="project.localRepositoryDirectory" value="${project.basedir}/Work/Core.git/" />
 	<property name="project.resourcesDirectory" value="${project.basedir}/Resources/" />
-	<property name="project.typo3VersionFile" value="t3lib/config_default.php" />
+	<property name="project.versionFile" value="t3lib/config_default.php" />
 
 	<exec logoutput="false" checkreturn="true" command="git --exec-path" outputProperty="project.gitPath" />
 	<property name="project.gitPath" value="${project.gitPath}/git" override="true" />
@@ -145,8 +148,17 @@
 					repository="${git.remoteRepository}"
 					targetPath="${project.localRepositoryDirectory}" />
 				-->
+				<exec logoutput="true" checkreturn="true"
+					dir="${project.localRepositoryDirectory}"
+					command="git config --local remote.origin.pushurl '${git.pushUrl}'" />
+				<exec logoutput="true" checkreturn="true"
+					dir="${project.localRepositoryDirectory}"
+					command="${git.commitHookCommand}" />
 			</then>
 			<else>
+				<exec logoutput="true" checkreturn="true"
+					dir="${project.localRepositoryDirectory}"
+					command="git reset --hard" />
 				<exec logoutput="true" checkreturn="true"
 					dir="${project.localRepositoryDirectory}"
 					command="git pull" />
@@ -157,7 +169,7 @@
 		</if>
 	</target>
 
-	<target name="repository-select" depends="repository-clone">
+	<target name="repository-select">
 		<fail unless="repository-select.branch" message="Property $repository-select.branch is required." />
 
 		<gitcheckout
@@ -179,12 +191,17 @@
 			gitPath="${project.gitPath}"
 			repository="${project.localRepositoryDirectory}"
 			name="${repository-typo3-tag.tag}"
-			commit="Tagged version ${repository-typo3-tag.version}"
+			message="Tagged version ${repository-typo3-tag.version}"
 			annotate="true" />
+		<exec logoutput="true" checkreturn="true"
+			dir="${project.localRepositoryDirectory}"
+			command="git push origin HEAD:refs/tags/${repository-typo3-tag.tag}${git.pushTarget}" />
+		<!--
 		<gitpush
 			gitPath="${project.gitPath}"
 			repository="${project.localRepositoryDirectory}"
 			refspec="HEAD:refs/tags/${repository-typo3-tag.tag}" />
+		-->
 	</target>
 
 	<target name="repository-typo3-version">
@@ -202,20 +219,25 @@
 
 		<exec logoutput="true" checkreturn="true"
 			dir="${project.localRepositoryDirectory}"
-			command="git commit ${project.typo3VersionFile} -m 'Changing TYPO3 version to ${repository-typo3-version.set}'" />
+			command="git commit ${project.versionFile} -m 'Changing TYPO3 version to ${repository-typo3-version.set}'" />
+		<exec logoutput="true" checkreturn="true"
+			dir="${project.localRepositoryDirectory}"
+			command="git push origin HEAD:refs/for/${repository-typo3-version.branch}${git.pushTarget}" />
+		<!--
 		<gitpush
 			gitPath="${project.gitPath}"
 			repository="${project.localRepositoryDirectory}"
 			refspec="HEAD:refs/fors/${repository-typo3-version.branch}" />
+		-->
 	</target>
 
 	<target name="typo3-version">
 		<fail unless="typo3-version.set" message="Property $repository-typo3-version.set is required." />
 		<fail unless="typo3-version.directory" message="Property $repository-typo3-version.directory is required" />
 
-		<property name="typo3-version.filePath" value="${typo3-version.directory}${project.typo3VersionFile}" />
+		<property name="typo3-version.filePath" value="${typo3-version.directory}${project.versionFile}" />
 
-		<move file="${typo3-version.filePath}" tofile="${typo3-version}.modified">
+		<move file="${typo3-version.filePath}" tofile="${typo3-version.filePath}.modified">
 			<filterchain>
 				<replaceregexp>
 					<regexp pattern="(\$TYPO_VERSION = )\'[^\']+" replace="$1'${typo3-version.set}" />
