@@ -59,8 +59,16 @@
 		<echo message="nextTag: ${common.info.nextTag}" />
 		<echo message="currentVersion: ${common.info.currentVersion}" />
 		<echo message="currentTag: ${common.info.currentTag}" />
+		<echo message="lastReference: ${common.info.lastReference}" />
 		<echo message="branchName: ${common.info.branchName}" />
 		<echo message="successorVersion: ${common.info.successorVersion}" />
+	</target>
+
+	<target name="test" depends="common">
+		<phingcall target="repository-typo3-changelog">
+			<property name="repository-typo3-changelog.file" value="${project.workDirectory}ChangeLog" />
+		</phingcall>
+
 	</target>
 
 	<target name="project-md5">
@@ -219,7 +227,16 @@
 
 		<exec logoutput="true" checkreturn="true"
 			dir="${project.localRepositoryDirectory}"
-			command="git commit ${project.versionFile} -m 'Changing TYPO3 version to ${repository-typo3-version.set}'" />
+			command="git commit -a -m '[RELEASE] Release of TYPO3 ${repository-typo3-version.set}' --author='TYPO3 v4 Release Team &lt;typo3v4@typo3.org&gt;'" />
+
+		<phingcall target="repository-typo3-changelog">
+			<property name="repository-typo3-changelog.file" value="${project.localRepositoryDirectory}ChangeLog" />
+		</phingcall>
+
+		<exec logoutput="true" checkreturn="true"
+			dir="${project.localRepositoryDirectory}"
+			command="git commit --amend -a -m '[RELEASE] Release of TYPO3 ${repository-typo3-version.set}' --author='TYPO3 v4 Release Team &lt;typo3v4@typo3.org&gt;'" />
+
 		<exec logoutput="true" checkreturn="true"
 			dir="${project.localRepositoryDirectory}"
 			command="git push origin HEAD:refs/for/${repository-typo3-version.branch}${git.pushTarget}" />
@@ -229,6 +246,18 @@
 			repository="${project.localRepositoryDirectory}"
 			refspec="HEAD:refs/fors/${repository-typo3-version.branch}" />
 		-->
+	</target>
+
+	<target name="repository-typo3-changelog">
+		<fail unless="repository-typo3-changelog.file" message="Property $repository-typo3-changelog.file is required" />
+
+		<exec logoutput="false" checkreturn="false"
+			dir="${project.localRepositoryDirectory}"
+			outputProperty="repository-typo3-changelog.raw"
+			command="git log refs/tags/${common.info.lastReference}..HEAD --pretty=format:hash:%h%x09date:%cd%x09subject:%s%x09author:%an%x09body:%b--%x09COMMIT --date=short" />
+		<typo3gitchangelog file="${repository-typo3-changelog.file}" property="repository-typo3-changelog.raw"
+			format="{{date}}  {{hash}}  {{body.resolves,8}}  {{subject}} ({{author}})"
+			fieldDelimiter="&#09;" commitDelimiter="--&#09;COMMIT" />
 	</target>
 
 	<target name="typo3-version">

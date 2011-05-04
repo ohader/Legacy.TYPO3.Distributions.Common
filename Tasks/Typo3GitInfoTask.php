@@ -102,9 +102,37 @@ class Typo3GitInfoTask extends GitBaseTask {
 		return $currentTag;
 	}
 
-	private function incrementTag($tag, $delimiter = self::TAG_Delimiter) {
-		$parts = explode($delimiter, $tag);
+	private function getCurrentSpecialTag(array $tags, $prefix, $type) {
+		$tag = NULL;
+		$specialTypes = array();
+
+		if ($type === self::TYPE_RC) {
+			$specialTypes = array(self::TYPE_RC, self::TYPE_Beta, self::TYPE_Alpha);
+		} elseif ($type === self::TYPE_Beta) {
+			$specialTypes = array(self::TYPE_Beta, self::TYPE_Alpha);
+		} elseif ($type === self::TYPE_Beta) {
+			$specialTypes = array(self::TYPE_Alpha);
+		}
+
+		foreach ($specialTypes as $specialType) {
+			$tag = $this->getCurrentTag($tags, $prefix . $specialType);
+			if (is_null($tag) === FALSE) {
+				break;
+			}
+		}
+
+		return $tag;
+	}
+
+	private function increment($ref, $delimiter = self::TAG_Delimiter) {
+		$parts = explode($delimiter, $ref);
 		$parts[count($parts)-1]++;
+		return implode($delimiter, $parts);
+	}
+
+	private function decrement($ref, $delimiter = self::TAG_Delimiter) {
+		$parts = explode($delimiter, $ref);
+		$parts[count($parts)-1]--;
 		return implode($delimiter, $parts);
 	}
 
@@ -138,6 +166,7 @@ class Typo3GitInfoTask extends GitBaseTask {
 			'nextVersion' => NULL,
 			'nextTag' => NULL,
 			'successorVersion' => NULL,
+			'lastReference' => NULL,
 			'branchName' => 'master',
 		);
 
@@ -146,29 +175,49 @@ class Typo3GitInfoTask extends GitBaseTask {
 		if ($this->type === self::TYPE_Regular) {
 			if (is_null($currentRegularTag)) {
 				$info['nextTag'] = $this->branch . self::TAG_Delimiter . '0';
+				$info['lastReference'] = $this->decrement($this->branch) . self::TAG_Delimiter . '0';
 			} else {
 				$info['currentTag'] = $currentRegularTag;
-				$info['nextTag'] = $this->incrementTag($info['currentTag']);
+				$info['nextTag'] = $this->increment($info['currentTag']);
+				$info['lastReference'] = $info['currentTag'];
 			}
+
 			$info['successorVersion'] = $this->convertToVersion(
-				$this->incrementTag($info['nextTag'])
+				$this->increment($info['nextTag'])
 			);
-		} elseif ($this->type !== self::TYPE_Snapshot) {
+		} elseif ($this->type === self::TYPE_Snapshot) {
+			if (is_null($currentRegularTag)) {
+				$info['lastReference'] = $this->decrement($this->branch) . self::TAG_Delimiter . '0';
+			} else {
+				$info['lastReference'] = $currentRegularTag;
+			}
+		} else {
 			if (is_null($currentRegularTag)) {
 				// TYPO3_4-6-0alpha
-				$irregularPrefix = $this->branch . self::TAG_Delimiter . '0' . $this->type;
+				$irregularPrefix = $this->branch . self::TAG_Delimiter . '0';
 			} else {
 				// TYPO3_4-5-3alpha - why not? ;-)
-				$irregularPrefix = $currentRegularTag . $this->type;
+				$irregularPrefix = $this->increment($currentRegularTag);
 			}
 
-			$info['currentTag'] = $this->getCurrentTag($tags, $irregularPrefix);
+			$info['currentTag'] = $this->getCurrentTag($tags, $irregularPrefix . $this->type);
 
 			if (is_null($info['currentTag'])) {
-				$info['nextTag'] = $irregularPrefix . '1';
+				$info['nextTag'] = $irregularPrefix . $this->type . '1';
+				$lastSpecialTag = $this->getCurrentSpecialTag($tags, $irregularPrefix, $this->type);
+
+				if (is_null($lastSpecialTag) === FALSE) {
+					$info['lastReference'] = $lastSpecialTag;
+				} elseif (is_null($currentRegularTag) === FALSE){
+					$info['lastReference'] = $currentRegularTag;
+				} else {
+					$info['lastReference'] = $this->decrement($this->branch) . self::TAG_Delimiter . '0';
+				}
 			} else {
-				$info['nextTag'] = $this->incrementTag($info['currentTag'], $this->type);
+				$info['nextTag'] = $this->increment($info['currentTag'], $this->type);
+				$info['lastReference'] = $info['currentTag'];
 			}
+
 			$info['successorVersion'] = $this->convertToVersion($this->branch);
 		}
 
