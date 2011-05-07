@@ -158,7 +158,7 @@
 				-->
 				<exec logoutput="true" checkreturn="true"
 					dir="${project.localRepositoryDirectory}"
-					command="git config --local remote.origin.pushurl '${git.pushUrl}'" />
+					command="git config remote.origin.pushurl '${git.pushUrl}'" />
 				<exec logoutput="true" checkreturn="true"
 					dir="${project.localRepositoryDirectory}"
 					command="${git.commitHookCommand}" />
