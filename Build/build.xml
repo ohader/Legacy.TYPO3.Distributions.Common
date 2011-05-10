@@ -112,31 +112,40 @@
 
 	<target name="repository-export">
 		<fail unless="repository-export.gitName" message="Property $repository-export.gitName is required." />
-		<fail unless="repository-export.filePath" message="Property $repository-export.filePath is required." />
 		<fail unless="repository-export.directory" message="Propery $repository-export.directory is required." />
 
 		<delete dir="${repository-export.directory}" quiet="true" />
 		<mkdir dir="${repository-export.directory}" />
 
+		<phingcall target="repository-select">
+			<property name="repository-select.branch" value="${repository-export.gitName}" />
+		</phingcall>
+
 		<exec logoutput="true" checkreturn="true"
-			command="git archive --format=zip --remote=${git.remoteRepository} ${repository-export.gitName} -o ${repository-export.filePath}" />
+			dir="${project.localRepositoryDirectory}"
+			command="git checkout-index -a --prefix=${repository-export.directory}" />
+		<exec logoutput="true" checkreturn="true"
+			dir="${project.localRepositoryDirectory}"
+			command="git submodule foreach 'git checkout-index -a --prefix=${repository-export.directory}$path'" />
 
-		<!-- extract base file of source -->
-		<unzip file="${repository-export.filePath}" todir="${repository-export.directory}">
-			<!-- clean up files from VCS -->
-			<fileset dir="${repository-export.directory}">
-				<exclude name="src" />
-				<exclude name="tests" />
-				<exclude name="CVS" />
-				<exclude name="SVNreadme.txt" />
-				<exclude name=".svn" />
-				<exclude name="*.webprj" />
-				<exclude name="*.orig" />
-				<exclude name="*~" />
+		<delete includeemptydirs="true">
+			<fileset dir="${repository-export.directory}" defaultexcludes="false">
+				<include name=".gitignore" />
+				<include name=".gitmodules" />
+				<include name="**/src" />
+				<include name="**/src/**" />
+				<include name="**/tests" />
+				<include name="**/tests/**" />
+				<include name=".svn" />
+				<include name="**/.svn" />
+				<include name="**/.svn/**" />
+				<include name="CVS" />
+				<include name="SVNreadme.txt" />
+				<include name="*.webprj" />
+				<include name="*.orig" />
+				<include name="*~" />
 			</fileset>
-		</unzip>
-
-		<delete file="${repository-export.filePath}" quiet="true"/>
+		</delete>
 	</target>
 
 
@@ -149,7 +158,7 @@
 				<mkdir dir="${project.localRepositoryDirectory}" />
 
 				<exec logoutput="true" checkreturn="true"
-					command="git clone ${git.remoteRepository} ${project.localRepositoryDirectory}" />
+					command="git clone --recursive ${git.remoteRepository} ${project.localRepositoryDirectory}" />
 				<!--
 				<gitclone
 					gitPath="${project.gitPath}"
