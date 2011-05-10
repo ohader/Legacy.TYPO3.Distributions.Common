@@ -25,6 +25,7 @@
 	<property name="git.commitHookCommand" value="scp -p -P 29418 review.typo3.org:hooks/commit-msg .git/hooks/" />
 	<property name="git.pushUrl" value="ssh://review.typo3.org/TYPO3v4/Core.git" />
 	<property name="git.pushTarget" value="/RELEASE-TEST" />
+	<property name="git.author" value="TYPO3 v4 Release Team &lt;typo3v4@typo3.org&gt;" />
 	<property name="project.targetsDirectory" value="${project.basedir}/Targets/" />
 	<property name="project.workDirectory" value="${project.basedir}/Work/" />
 	<property name="project.localRepositoryDirectory" value="${project.basedir}/Work/Core.git/" />
@@ -177,7 +178,10 @@
 			<else>
 				<exec logoutput="true" checkreturn="true"
 					dir="${project.localRepositoryDirectory}"
-					command="git reset --hard" />
+					command="git reset --hard origin" />
+				<exec logoutput="true" checkreturn="true"
+					dir="${project.localRepositoryDirectory}"
+					command="git clean -df" />
 				<exec logoutput="true" checkreturn="true"
 					dir="${project.localRepositoryDirectory}"
 					command="git pull" />
@@ -232,6 +236,19 @@
 		</if>
 	</target>
 
+	<target name="repository-typo3-push">
+		<fail unless="repository-typo3-push.branch" message="Property $repository-typo3-push is required" />
+
+		<if>
+			<equals arg1="${common.publish}" arg2="y" />
+			<then>
+				<exec logoutput="true" checkreturn="true"
+					dir="${project.localRepositoryDirectory}"
+					command="git push origin HEAD:refs/for/${repository-typo3-push.branch}${git.pushTarget}" />
+			</then>
+		</if>
+	</target>
+
 	<target name="repository-typo3-version">
 		<fail unless="repository-typo3-version.set" message="Property $repository-typo3-version.set is required." />
 		<fail unless="repository-typo3-version.branch" message="Property $repository-typo3-version.branch is required." />
@@ -244,36 +261,20 @@
 			<property name="typo3-version.set" value="${repository-typo3-version.set}" />
 			<property name="typo3-version.directory" value="${project.localRepositoryDirectory}" />
 		</phingcall>
-
-		<exec logoutput="true" checkreturn="true"
-			dir="${project.localRepositoryDirectory}"
-			command="git commit -a -m '[RELEASE] Release of TYPO3 ${repository-typo3-version.set}' --author='TYPO3 v4 Release Team &lt;typo3v4@typo3.org&gt;'" />
-
-		<phingcall target="repository-typo3-changelog">
-			<property name="repository-typo3-changelog.file" value="${project.localRepositoryDirectory}ChangeLog" />
-		</phingcall>
-
-		<exec logoutput="true" checkreturn="true"
-			dir="${project.localRepositoryDirectory}"
-			command="git commit --amend -a -m '[RELEASE] Release of TYPO3 ${repository-typo3-version.set}' --author='TYPO3 v4 Release Team &lt;typo3v4@typo3.org&gt;'" />
-
-		<if>
-			<equals arg1="${common.publish}" arg2="y" />
-			<then>
-				<exec logoutput="true" checkreturn="true"
-					dir="${project.localRepositoryDirectory}"
-					command="git push origin HEAD:refs/for/${repository-typo3-version.branch}${git.pushTarget}" />
-			</then>
-		</if>
 	</target>
 
 	<target name="repository-typo3-changelog">
 		<fail unless="repository-typo3-changelog.file" message="Property $repository-typo3-changelog.file is required" />
+		<fail unless="repository-typo3-changelog.branch" message="Property $repository-typo3-changelog is required" />
+
+		<phingcall target="repository-select">
+			<property name="repository-select.branch" value="${repository-typo3-changelog.branch}" />
+		</phingcall>
 
 		<exec logoutput="false" checkreturn="false"
 			dir="${project.localRepositoryDirectory}"
 			outputProperty="repository-typo3-changelog.raw"
-			command="git log refs/tags/${common.info.lastReference}..HEAD --pretty=format:hash:%h%x09date:%cd%x09subject:%s%x09author:%an%x09body:%b--%x09COMMIT --date=short" />
+			command="git log refs/tags/${common.info.lastReference}..HEAD --submodule --pretty=format:hash:%h%x09date:%cd%x09subject:%s%x09author:%an%x09body:%b--%x09COMMIT --date=short" />
 		<typo3gitchangelog file="${repository-typo3-changelog.file}" property="repository-typo3-changelog.raw"
 			format="{{date}}  {{hash}}  {{body.resolves,8}}  {{subject}} ({{author}})"
 			fieldDelimiter="&#09;" commitDelimiter="--&#09;COMMIT" />
