@@ -197,15 +197,18 @@
 			branchname="${repository-select.branch}" />
 	</target>
 
+	<!-- this target does a "git tag" command for the main repository and its submodules -->
 	<target name="repository-typo3-tag">
+		<!-- only tag if the appropriate variables are set -->
 		<fail unless="repository-typo3-tag.tag" message="Property $repository-typo3-tag.tag is required." />
 		<fail unless="repository-typo3-tag.branch" message="Property $repository-typo3-tag.branch is required." />
 		<fail unless="repository-typo3-tag.version" message="Property $repository-typo3-tag.version is required." />
-	
+
 		<phingcall target="repository-select">
 			<property name="repository-select.branch" value="${repository-typo3-tag.branch}" />
 		</phingcall>
 
+		<!-- tagging the main project -->
 		<gittag
 			gitPath="${project.gitPath}"
 			repository="${project.localRepositoryDirectory}"
@@ -213,6 +216,12 @@
 			message="Tagged version ${repository-typo3-tag.version}"
 			annotate="true" />
 
+		<!-- tagging each submodule was well -->
+		<exec logoutput="true" checkreturn="true"
+			dir="${project.localRepositoryDirectory}"
+			command="git submodule foreach 'git tag -a -m \'Tagged version ${repository-typo3-tag.version}\' \'${repository-typo3-tag.tag}\''" />
+
+		<!-- publish the tags to the remote repository, if the option was set -->
 		<if>
 			<equals arg1="${common.publish}" arg2="y" />
 			<then>
