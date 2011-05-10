@@ -130,7 +130,7 @@
 			command="git checkout-index -a --prefix=${repository-export.directory}" />
 		<exec logoutput="true" checkreturn="true"
 			dir="${project.localRepositoryDirectory}"
-			command="git submodule foreach 'git checkout-index -a --prefix=${repository-export.directory}$path'" />
+			command="git submodule foreach 'git checkout-index -a --prefix=${repository-export.directory}$path/'" />
 
 		<delete includeemptydirs="true">
 			<fileset dir="${repository-export.directory}" defaultexcludes="false">
