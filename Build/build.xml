@@ -25,7 +25,7 @@
 	<property name="git.commitHookCommand" value="scp -p -P 29418 review.typo3.org:hooks/commit-msg .git/hooks/" />
 	<property name="git.submitApprovalCommand" value="ssh -p 29418 typo3v4@review.typo3.org gerrit approve --project TYPO3v4/Core --message 'Auto-approved' --submit " />
 	<property name="git.pushUrl" value="ssh://review.typo3.org/TYPO3v4/Core.git" />
-	<property name="git.pushTarget" value="/RELEASE-TEST" />
+	<property name="git.pushTopic" value="/RELEASE" />
 	<property name="git.author" value="TYPO3 v4 Release Team &lt;typo3v4@typo3.org&gt;" />
 	<property name="project.targetsDirectory" value="${project.basedir}/Targets/" />
 	<property name="project.workDirectory" value="${project.basedir}/Work/" />
@@ -235,7 +235,7 @@
 			<then>
 				<exec logoutput="true" checkreturn="true"
 					dir="${project.localRepositoryDirectory}"
-					command="git push origin HEAD:refs/tags/${repository-typo3-tag.tag}${git.pushTarget}" />
+					command="git push origin HEAD:refs/tags/${repository-typo3-tag.tag}${git.pushTopic}" />
 			</then>
 		</if>
 	</target>
@@ -248,7 +248,7 @@
 			<then>
 				<exec logoutput="true" checkreturn="true"
 					dir="${project.localRepositoryDirectory}"
-					command="git push origin HEAD:refs/for/${repository-typo3-push.branch}${git.pushTarget}" />
+					command="git push origin HEAD:refs/for/${repository-typo3-push.branch}${git.pushTopic}" />
 				<phingcall target="repository-typo3-approve" />
 			</then>
 		</if>
