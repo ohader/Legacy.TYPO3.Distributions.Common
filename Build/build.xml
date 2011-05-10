@@ -43,6 +43,8 @@
 			validArgs="snapshot,regular,alpha,beta,rc" message="Type of the release" />
 		<input propertyName="common.major" defaultValue="4.6"
 			validArgs="4.1,4.2,4.3,4.4,4.5,4.6" message="Major version of the release" />
+		<input propertyName="common.publish" defaultValue="n"
+			validArgs="y,n" message="Publish (Git repository, SourceForge)" />
 
 		<phingcall target="repository-clone" />
 
@@ -210,15 +212,15 @@
 			name="${repository-typo3-tag.tag}"
 			message="Tagged version ${repository-typo3-tag.version}"
 			annotate="true" />
-		<exec logoutput="true" checkreturn="true"
-			dir="${project.localRepositoryDirectory}"
-			command="git push origin HEAD:refs/tags/${repository-typo3-tag.tag}${git.pushTarget}" />
-		<!--
-		<gitpush
-			gitPath="${project.gitPath}"
-			repository="${project.localRepositoryDirectory}"
-			refspec="HEAD:refs/tags/${repository-typo3-tag.tag}" />
-		-->
+
+		<if>
+			<equals arg1="${common.publish}" arg2="y" />
+			<then>
+				<exec logoutput="true" checkreturn="true"
+					dir="${project.localRepositoryDirectory}"
+					command="git push origin HEAD:refs/tags/${repository-typo3-tag.tag}${git.pushTarget}" />
+			</then>
+		</if>
 	</target>
 
 	<target name="repository-typo3-version">
@@ -246,15 +248,14 @@
 			dir="${project.localRepositoryDirectory}"
 			command="git commit --amend -a -m '[RELEASE] Release of TYPO3 ${repository-typo3-version.set}' --author='TYPO3 v4 Release Team &lt;typo3v4@typo3.org&gt;'" />
 
-		<exec logoutput="true" checkreturn="true"
-			dir="${project.localRepositoryDirectory}"
-			command="git push origin HEAD:refs/for/${repository-typo3-version.branch}${git.pushTarget}" />
-		<!--
-		<gitpush
-			gitPath="${project.gitPath}"
-			repository="${project.localRepositoryDirectory}"
-			refspec="HEAD:refs/fors/${repository-typo3-version.branch}" />
-		-->
+		<if>
+			<equals arg1="${common.publish}" arg2="y" />
+			<then>
+				<exec logoutput="true" checkreturn="true"
+					dir="${project.localRepositoryDirectory}"
+					command="git push origin HEAD:refs/for/${repository-typo3-version.branch}${git.pushTarget}" />
+			</then>
+		</if>
 	</target>
 
 	<target name="repository-typo3-changelog">
@@ -290,16 +291,21 @@
 		watch it: untested, and the folder structure is still unclear
 	-->
 	<target name="publish-sourceforge" description="Upload existing archives of the TYPO3 source to SourceForce">
-		<fail unless="publish-sourceforge.directory" message="Property $publish-sourceforge.name is required." />
-		<typo3convertwhitespaces property="publish-sourceforge.directory" />
-		<echo message="${publish-sourceforge.directory}" />
+		<if>
+			<equals arg1="${common.publish}" arg2="y" />
+			<then>
+				<fail unless="publish-sourceforge.directory" message="Property $publish-sourceforge.name is required." />
+				<typo3convertwhitespaces property="publish-sourceforge.directory" />
+				<echo message="${publish-sourceforge.directory}" />
 
-		<!-- the only way to create a folder via ssh, thanks FLOW3 -->
-		<exec logoutput="true" checkreturn="true" command="ssh shell.sourceforge.net create" />
-		<!-- <exec logoutput="true" checkreturn="true" command="ssh shell.sourceforge.net mkdir -p '/home/frs/project/t/ty/typo3/TYPO3 Source and Dummy/${publish-sourceforge.directory}'" /> -->
-		<exec logoutput="true" checkreturn="true" command="ssh shell.sourceforge.net mkdir -p '/home/frs/project/t/ty/typo3/TYPO3v4Testing/${publish-sourceforge.directory}'" />
-		<exec logoutput="true" checkreturn="true" command="ssh shell.sourceforge.net shutdown" />
-		<!-- <exec logoutput="true" checkreturn="true" command="scp ${project.baseDirectory}{baseName}.* 'frs.sourceforge.net:/home/frs/project/t/ty/typo3/TYPO3 Source and Dummy/${publish-sourceforge.directory}/'" /> -->
-		<exec logoutput="true" checkreturn="true" command="scp ${project.targetsDirectory}* frs.sourceforge.net:'/home/frs/project/t/ty/typo3/TYPO3v4Testing/${publish-sourceforge.directory}/'" />
+				<!-- the only way to create a folder via ssh, thanks FLOW3 -->
+				<exec logoutput="true" checkreturn="true" command="ssh shell.sourceforge.net create" />
+				<!-- <exec logoutput="true" checkreturn="true" command="ssh shell.sourceforge.net mkdir -p '/home/frs/project/t/ty/typo3/TYPO3 Source and Dummy/${publish-sourceforge.directory}'" /> -->
+				<exec logoutput="true" checkreturn="true" command="ssh shell.sourceforge.net mkdir -p '/home/frs/project/t/ty/typo3/TYPO3v4Testing/${publish-sourceforge.directory}'" />
+				<exec logoutput="true" checkreturn="true" command="ssh shell.sourceforge.net shutdown" />
+				<!-- <exec logoutput="true" checkreturn="true" command="scp ${project.baseDirectory}{baseName}.* 'frs.sourceforge.net:/home/frs/project/t/ty/typo3/TYPO3 Source and Dummy/${publish-sourceforge.directory}/'" /> -->
+				<exec logoutput="true" checkreturn="true" command="scp ${project.targetsDirectory}* frs.sourceforge.net:'/home/frs/project/t/ty/typo3/TYPO3v4Testing/${publish-sourceforge.directory}/'" />
+			</then>
+		</if>
 	</target>
 </project>
