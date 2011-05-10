@@ -186,6 +186,9 @@
 				<exec logoutput="true" checkreturn="true"
 					dir="${project.localRepositoryDirectory}"
 					command="git pull" />
+				<exec logoutput="true" checkreturn="true"
+					dir="${project.localRepositoryDirectory}"
+					command="git submodule update --init" />
 				<!--
 				<gitpull repository="${git.remoteRepository}" gitPath="${project.gitPath}" />
 				-->
@@ -314,20 +317,21 @@
 		watch it: untested, and the folder structure is still unclear
 	-->
 	<target name="publish-sourceforge" description="Upload existing archives of the TYPO3 source to SourceForce">
+		<fail unless="publish-sourceforge.directory" message="Property $publish-sourceforge.name is required." />
+
 		<if>
 			<equals arg1="${common.publish}" arg2="y" />
 			<then>
-				<fail unless="publish-sourceforge.directory" message="Property $publish-sourceforge.name is required." />
-				<typo3convertwhitespaces property="publish-sourceforge.directory" />
-				<echo message="${publish-sourceforge.directory}" />
+				<property name="publish-sourceforge.fullPath" value="/home/frs/project/t/ty/typo3/TYPO3 Source and Dummy/${publish-sourceforge.directory}" />
+				<typo3convertwhitespaces property="publish-sourceforge.fullPath" />
+				<echo message="Publishing to ${publish-sourceforge.fullPath}" />
 
 				<!-- the only way to create a folder via ssh, thanks FLOW3 -->
 				<exec logoutput="true" checkreturn="true" command="ssh shell.sourceforge.net create" />
-				<!-- <exec logoutput="true" checkreturn="true" command="ssh shell.sourceforge.net mkdir -p '/home/frs/project/t/ty/typo3/TYPO3 Source and Dummy/${publish-sourceforge.directory}'" /> -->
-				<exec logoutput="true" checkreturn="true" command="ssh shell.sourceforge.net mkdir -p '/home/frs/project/t/ty/typo3/TYPO3v4Testing/${publish-sourceforge.directory}'" />
+				<exec logoutput="true" checkreturn="true" command="ssh shell.sourceforge.net mkdir -p '${publish-sourceforge.fullPath}'" />
+				<exec logoutput="true" checkreturn="true" command="ssh shell.sourceforge.net chmod 0775 '${publish-sourceforge.fullPath}'" />
 				<exec logoutput="true" checkreturn="true" command="ssh shell.sourceforge.net shutdown" />
-				<!-- <exec logoutput="true" checkreturn="true" command="scp ${project.baseDirectory}{baseName}.* 'frs.sourceforge.net:/home/frs/project/t/ty/typo3/TYPO3 Source and Dummy/${publish-sourceforge.directory}/'" /> -->
-				<exec logoutput="true" checkreturn="true" command="scp ${project.targetsDirectory}* frs.sourceforge.net:'/home/frs/project/t/ty/typo3/TYPO3v4Testing/${publish-sourceforge.directory}/'" />
+				<exec logoutput="true" checkreturn="true" command="scp ${project.targetsDirectory}* frs.sourceforge.net:'${publish-sourceforge.fullPath}/'" />
 			</then>
 		</if>
 	</target>
