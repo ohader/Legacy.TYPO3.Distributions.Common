@@ -23,6 +23,7 @@
 
 	<property name="git.remoteRepository" value="git://git.typo3.org/TYPO3v4/Core.git" />
 	<property name="git.commitHookCommand" value="scp -p -P 29418 review.typo3.org:hooks/commit-msg .git/hooks/" />
+	<property name="git.submitApprovalCommand" value="ssh -p 29418 typo3v4@review.typo3.org gerrit approve --project TYPO3v4/Core --message 'Auto-approved' --submit " />
 	<property name="git.pushUrl" value="ssh://review.typo3.org/TYPO3v4/Core.git" />
 	<property name="git.pushTarget" value="/RELEASE-TEST" />
 	<property name="git.author" value="TYPO3 v4 Release Team &lt;typo3v4@typo3.org&gt;" />
@@ -245,8 +246,20 @@
 				<exec logoutput="true" checkreturn="true"
 					dir="${project.localRepositoryDirectory}"
 					command="git push origin HEAD:refs/for/${repository-typo3-push.branch}${git.pushTarget}" />
+				<phingcall target="repository-typo3-approve" />
 			</then>
 		</if>
+	</target>
+
+	<target name="repository-typo3-approve">
+		<!-- also submit the patch through gerrit after the push -->
+		<exec logoutput="false" checkreturn="false"
+			dir="${project.localRepositoryDirectory}"
+			outputProperty="repository-typo3-approve.commitHash"
+			command="git log -1 --pretty=format:%H" />
+		<exec logoutput="true" checkreturn="true"
+			dir="${project.localRepositoryDirectory}"
+			command="${git.submitApprovalCommand} ${repository-typo3-approve.commitHash}" />
 	</target>
 
 	<target name="repository-typo3-version">
