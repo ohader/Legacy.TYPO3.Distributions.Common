@@ -233,9 +233,14 @@
 		<if>
 			<equals arg1="${common.publish}" arg2="y" />
 			<then>
+				<!-- push tag for super project (Core) -->
 				<exec logoutput="true" checkreturn="true"
 					dir="${project.localRepositoryDirectory}"
-					command="git push origin HEAD:refs/tags/${repository-typo3-tag.tag}${git.pushTopic}" />
+					command="git push origin HEAD:refs/tags/${repository-typo3-tag.tag}" />
+				<!-- push tags for submodules (workspaces, dbal, ...) -->
+				<exec logoutput="true" checkreturn="true"
+					dir="${project.localRepositoryDirectory}"
+					command="git submodule foreach 'git push origin HEAD:refs/tags/${repository-typo3-tag.tag}'" />
 			</then>
 		</if>
 	</target>
