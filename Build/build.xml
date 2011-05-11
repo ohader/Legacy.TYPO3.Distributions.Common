@@ -23,7 +23,7 @@
 
 	<property name="git.remoteRepository" value="git://git.typo3.org/TYPO3v4/Core.git" />
 	<property name="git.commitHookCommand" value="scp -p -P 29418 review.typo3.org:hooks/commit-msg .git/hooks/" />
-	<property name="git.submitApprovalCommand" value="ssh -p 29418 typo3v4@review.typo3.org gerrit approve --project TYPO3v4/Core --message 'Auto-approved' --submit " />
+	<property name="git.submitApprovalCommand" value="ssh -p 29418 review.typo3.org gerrit approve --verified=+2 --code-review=+2 --project TYPO3v4/Core --message 'Auto-approved' --submit" />
 	<property name="git.pushUrl" value="ssh://review.typo3.org/TYPO3v4/Core.git" />
 	<property name="git.pushTopic" value="/RELEASE" />
 	<property name="git.author" value="TYPO3 v4 Release Team &lt;typo3v4@typo3.org&gt;" />
@@ -169,12 +169,25 @@
 					repository="${git.remoteRepository}"
 					targetPath="${project.localRepositoryDirectory}" />
 				-->
+
+				<!-- Git configuration -->
 				<exec logoutput="true" checkreturn="true"
 					dir="${project.localRepositoryDirectory}"
 					command="git config remote.origin.pushurl '${git.pushUrl}'" />
 				<exec logoutput="true" checkreturn="true"
 					dir="${project.localRepositoryDirectory}"
+					command="git config user.name 'TYPO3 v4 Release Team'" />
+				<exec logoutput="true" checkreturn="true"
+					dir="${project.localRepositoryDirectory}"
+					command="git config user.email 'typo3v4@typo3.org'" />
+
+				<!-- Commit Hooks -->
+				<exec logoutput="true" checkreturn="true"
+					dir="${project.localRepositoryDirectory}"
 					command="${git.commitHookCommand}" />
+				<exec logoutput="true" checkreturn="true"
+					dir="${project.localRepositoryDirectory}"
+					command="git submodule foreach '${git.commitHookCommand}'" />
 			</then>
 			<else>
 				<exec logoutput="true" checkreturn="true"
