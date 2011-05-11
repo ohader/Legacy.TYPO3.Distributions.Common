@@ -201,6 +201,9 @@
 					command="git pull" />
 				<exec logoutput="true" checkreturn="true"
 					dir="${project.localRepositoryDirectory}"
+					command="git fetch --tags" />
+				<exec logoutput="true" checkreturn="true"
+					dir="${project.localRepositoryDirectory}"
 					command="git submodule update --init" />
 				<!--
 				<gitpull repository="${git.remoteRepository}" gitPath="${project.gitPath}" />
