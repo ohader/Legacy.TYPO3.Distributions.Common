@@ -200,6 +200,12 @@
 					command="git clean -df" />
 				<exec logoutput="true" checkreturn="true"
 					dir="${project.localRepositoryDirectory}"
+					command="git checkout master" />
+				<exec logoutput="true" checkreturn="true"
+					dir="${project.localRepositoryDirectory}"
+					command="git clean -df" />
+				<exec logoutput="true" checkreturn="true"
+					dir="${project.localRepositoryDirectory}"
 					command="git pull" />
 				<exec logoutput="true" checkreturn="true"
 					dir="${project.localRepositoryDirectory}"
