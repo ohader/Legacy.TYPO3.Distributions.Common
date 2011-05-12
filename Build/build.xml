@@ -52,6 +52,8 @@
 			<property name="project.resourcesDirectory" value="${project.distributionsDirectory}Introduction/Resources/" override="true" />
 		</phingcall>
 
+		<phingcall target="project-md5" />
+
 		<phingcall target="publish-sourceforge">
 			<property name="publish-sourceforge.directory" value="TYPO3 ${build.versionName}" />
 		</phingcall>
