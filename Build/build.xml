@@ -22,30 +22,38 @@
 	<property name="common.baseDir" value="" override="true" />
 	<property name="common.taskPrefix" value="" override="true" />
 
-	<property name="git.distributionsRepositoryBase" value="git://git.typo3.org/TYPO3v4/Distributions/" />
 	<property name="project.distributionsDirectory" value="${project.basedir}/Distributions/" />
-	<property name="project.distributions" value="Base,Blank,Introduction" />
 
 	<import file="${project.basedir}/${common.baseDir}Build/common.xml" />
 	<property name="common.isLoaded" value="true" override="true" />
 
-	<target name="build">
-		<phingcall target="build-initialize" />
-	</target>
+	<import file="${project.distributionsDirectory}Base/Build/build.xml" />
+	<import file="${project.distributionsDirectory}Blank/Build/build.xml" />
+	<import file="${project.distributionsDirectory}Introduction/Build/build.xml" />
 
-	<target name="build-initialize">
-		<delete dir="${project.distributionsDirectory}" quiet="true" />
-		<mkdir dir="${project.distributionsDirectory}" />
+	<target name="build" depends="common,project-initialize">
+		<if>
+			<equals arg1="${common.type}" arg2="snapshot" />
+			<then>
+				<property name="build.versionName" value="${common.major}-snapshot-${common.date}" />
+			</then>
+			<else>
+				<property name="build.versionName" value="${common.info.nextVersion}" />
+			</else>
+		</if>
 
-		<foreach list="${project.distributions}" param="build-fetch-distribution.name" target="build-fetch-distribution" />
-	</target>
+		<phingcall target="base-execute">
+			<property name="project.resourcesDirectory" value="${project.distributionsDirectory}Base/Resources/" override="true" />
+		</phingcall>
+		<phingcall target="blank-execute">
+			<property name="project.resourcesDirectory" value="${project.distributionsDirectory}Blank/Resources/" override="true" />
+		</phingcall>
+		<phingcall target="introduction-execute">
+			<property name="project.resourcesDirectory" value="${project.distributionsDirectory}Introduction/Resources/" override="true" />
+		</phingcall>
 
-	<target name="build-fetch-distribution">
-		<fail unless="build-fetch-distribution.name" message="Parameter $build-fetch-distribution.name is required" />
-
-		<exec logoutput="true" checkreturn="true"
-			command="git clone ${git.distributionsRepositoryBase}${build-fetch-distribution.name}.git ${project.distributionsDirectory}${build-fetch-distribution.name}/" />
-
-		<import file="${project.distributionsDirectory}${build-fetch-distribution.name}/Build/build.xml" />
+		<phingcall target="publish-sourceforge">
+			<property name="publish-sourceforge.directory" value="TYPO3 ${build.versionName}" />
+		</phingcall>
 	</target>
 </project>

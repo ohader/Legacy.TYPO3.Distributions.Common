@@ -35,6 +35,7 @@
 	<property name="git.pushUrl" value="ssh://review.typo3.org/TYPO3v4/Core.git" />
 	<property name="git.pushTopic" value="/RELEASE" />
 	<property name="git.author" value="TYPO3 v4 Release Team &lt;typo3v4@typo3.org&gt;" />
+
 	<property name="project.targetsDirectory" value="${project.basedir}/Targets/" />
 	<property name="project.workDirectory" value="${project.basedir}/Work/" />
 	<property name="project.localRepositoryDirectory" value="${project.basedir}/Work/Core.git/" />
