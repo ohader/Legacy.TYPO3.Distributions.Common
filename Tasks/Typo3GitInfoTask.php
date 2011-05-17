@@ -61,23 +61,32 @@ class Typo3GitInfoTask extends GitBaseTask {
 
 	private function getGitTags() {
 		$client = $this->getGitClient(false, $this->getRepository());
-		$command = $client->getCommand('tag');
-		$command->setOption('l', TRUE);
-		$tags = $this->explode($command->execute());
+		$command = $client->getCommand('ls-remote');
+		$command->setOption('tags', TRUE);
+		$result = preg_replace('#^[^/]*refs/tags/(' . self::TAG_Prefix . '.+)$#m', '$1', $command->execute());
+		$tags = $this->explode($result);
 		return $tags;
 	}
 
 	private function getGitBranches() {
 		$client = $this->getGitClient(false, $this->getRepository());
-		$command = $client->getCommand('branch');
-		$command->setOption('r', TRUE);
-		$branches = $this->explode($command->execute());
+		$command = $client->getCommand('ls-remote');
+		$command->setOption('heads', TRUE);
+		$result = preg_replace('#^[^/]*refs/heads/(' . self::TAG_Prefix . '.+)$#m', '$1', $command->execute());
+		$branches = $this->explode($result);
 		return $branches;
 	}
 
 	private function explode($string) {
-		$string = preg_replace('/^(\*|\s+)/m', '', $string);
+		$string = trim($string);
 		$elements = explode(PHP_EOL, $string);
+
+		foreach ($elements as $index => $element) {
+			if (strpos($element, self::TAG_Prefix) !== 0) {
+				unset($elements[$index]);
+			}
+		}
+
 		return $elements;
 	}
 

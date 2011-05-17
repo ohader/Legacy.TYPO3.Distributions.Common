@@ -227,6 +227,9 @@
 			gitPath="${project.gitPath}"
 			repository="${project.localRepositoryDirectory}"
 			branchname="${repository-select.branch}" />
+		<exec logoutput="true" checkreturn="true"
+			dir="${project.localRepositoryDirectory}"
+			command="git submodule update --init" />
 	</target>
 
 	<!-- this target does a "git tag" command for the main repository and its submodules -->
@@ -241,17 +244,14 @@
 		</phingcall>
 
 		<!-- tagging the main project -->
-		<gittag
-			gitPath="${project.gitPath}"
-			repository="${project.localRepositoryDirectory}"
-			name="${repository-typo3-tag.tag}"
-			message="Tagged version ${repository-typo3-tag.version}"
-			annotate="true" />
+		<exec logoutput="true" checkreturn="true"
+			dir="${project.localRepositoryDirectory}"
+			command="git tag -a -f -m 'Tagged version ${repository-typo3-tag.version}' ${repository-typo3-tag.tag}" />
 
 		<!-- tagging each submodule was well -->
 		<exec logoutput="true" checkreturn="true"
 			dir="${project.localRepositoryDirectory}"
-			command="git submodule foreach 'git tag -a -m &quot;Tagged version ${repository-typo3-tag.version}&quot; ${repository-typo3-tag.tag}'" />
+			command="git submodule foreach 'git tag -a -f -m &quot;Tagged version ${repository-typo3-tag.version}&quot; ${repository-typo3-tag.tag}'" />
 
 		<!-- publish the tags to the remote repository, if the option was set -->
 		<if>
