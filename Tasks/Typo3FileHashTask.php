@@ -20,7 +20,7 @@ class Typo3FileHashTask extends Task {
 		if ($method !== self::HASH_SHA1 && $method !== self::HASH_MD5) {
 			throw new BuildException('Hash method "' . $method . '" is not supported.', $this->location);
 		}
-		$this->methos = $method;
+		$this->method = $method;
 	}
 
 	public function setReturnProperty($returnProperty) {
