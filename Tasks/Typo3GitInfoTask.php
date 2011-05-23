@@ -230,7 +230,7 @@ class Typo3GitInfoTask extends GitBaseTask {
 			$info['successorVersion'] = $this->convertToVersion($this->branch);
 		}
 
-		if (in_array('origin/' . $this->branch, $branches)) {
+		if (in_array($this->branch, $branches)) {
 			$info['branchName'] = $this->branch;
 		}
 
