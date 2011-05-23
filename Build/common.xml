@@ -19,6 +19,7 @@
  * The TYPO3 project - inspiring people to share!                         *
 -->
 <project name="TYPO3v4Common" basedir="." default="common">
+	<property name="common.all" value="false" />
 	<property name="common.baseDir" value="Common/" />
 	<property name="common.taskPrefix" value="Common." />
 

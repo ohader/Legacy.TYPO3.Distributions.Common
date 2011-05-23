@@ -19,6 +19,7 @@
  * The TYPO3 project - inspiring people to share!                         *
 -->
 <project name="TYPO3v4Build" basedir="." default="build">
+	<property name="common.all" value="true" override="true" />
 	<property name="common.baseDir" value="" override="true" />
 	<property name="common.taskPrefix" value="" override="true" />
 
