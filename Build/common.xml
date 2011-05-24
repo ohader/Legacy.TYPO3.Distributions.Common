@@ -75,6 +75,7 @@
 		<echo message="currentTag: ${common.info.currentTag}" />
 		<echo message="lastReference: ${common.info.lastReference}" />
 		<echo message="branchName: ${common.info.branchName}" />
+		<echo message="isOutdatedBranch: ${common.info.isOutdatedBranch}" />
 		<echo message="successorVersion: ${common.info.successorVersion}" />
 	</target>
 

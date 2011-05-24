@@ -43,15 +43,25 @@
 			</else>
 		</if>
 
+		<!-- build Base -->
 		<phingcall target="base-execute">
 			<property name="project.resourcesDirectory" value="${project.distributionsDirectory}Base/Resources/" override="true" />
 		</phingcall>
+
+		<!-- build Blank -->
 		<phingcall target="blank-execute">
 			<property name="project.resourcesDirectory" value="${project.distributionsDirectory}Blank/Resources/" override="true" />
 		</phingcall>
-		<phingcall target="introduction-execute">
-			<property name="project.resourcesDirectory" value="${project.distributionsDirectory}Introduction/Resources/" override="true" />
-		</phingcall>
+
+		<!-- build Introduction if the branch is not outdated -->
+		<if>
+			<isfalse value="${common.info.isOutdatedBranch}" />
+			<then>
+				<phingcall target="introduction-execute">
+					<property name="project.resourcesDirectory" value="${project.distributionsDirectory}Introduction/Resources/" override="true" />
+				</phingcall>
+			</then>
+		</if>
 
 		<phingcall target="project-md5" />
 

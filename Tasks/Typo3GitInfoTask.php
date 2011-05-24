@@ -7,6 +7,7 @@ class Typo3GitInfoTask extends GitBaseTask {
 	const TYPE_RC = 'rc';
 	const TAG_Prefix = 'TYPO3_';
 	const TAG_Delimiter = '-';
+	const VERSION_Pattern = '\d+-\d+';
 	const VERSION_Delimiter = '.';
 
 	/**
@@ -65,6 +66,7 @@ class Typo3GitInfoTask extends GitBaseTask {
 		$command->setOption('tags', TRUE);
 		$result = preg_replace('#^[^/]*refs/tags/(' . self::TAG_Prefix . '.+)$#m', '$1', $command->execute());
 		$tags = $this->explode($result);
+		sort($tags);
 		return $tags;
 	}
 
@@ -74,6 +76,7 @@ class Typo3GitInfoTask extends GitBaseTask {
 		$command->setOption('heads', TRUE);
 		$result = preg_replace('#^[^/]*refs/heads/(' . self::TAG_Prefix . '.+)$#m', '$1', $command->execute());
 		$branches = $this->explode($result);
+		sort($branches);
 		return $branches;
 	}
 
@@ -82,7 +85,7 @@ class Typo3GitInfoTask extends GitBaseTask {
 		$elements = explode(PHP_EOL, $string);
 
 		foreach ($elements as $index => $element) {
-			if (strpos($element, self::TAG_Prefix) !== 0) {
+			if (!preg_match('#^' . self::TAG_Prefix . self::VERSION_Pattern . '#', $element)) {
 				unset($elements[$index]);
 			}
 		}
@@ -177,6 +180,7 @@ class Typo3GitInfoTask extends GitBaseTask {
 			'successorVersion' => NULL,
 			'lastReference' => NULL,
 			'branchName' => 'master',
+			'isOutdatedBranch' => FALSE,
 		);
 
 		$currentRegularTag = $this->getCurrentTag($tags, $this->branch . self::TAG_Delimiter);
@@ -232,6 +236,7 @@ class Typo3GitInfoTask extends GitBaseTask {
 
 		if (in_array($this->branch, $branches)) {
 			$info['branchName'] = $this->branch;
+			$info['isOutdatedBranch'] = (array_search($this->branch, $branches) < count($branches) - 1);
 		}
 
 		$info['currentVersion'] = $this->convertToVersion($info['currentTag']);
