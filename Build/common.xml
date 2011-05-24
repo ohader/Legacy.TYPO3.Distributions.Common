@@ -197,10 +197,10 @@
 					command="git submodule foreach 'git config remote.origin.pushurl &quot;${git.pushUrl}&quot;'" />
 				<exec logoutput="true" checkreturn="true"
 					dir="${project.localRepositoryDirectory}"
-					command="git submodule foreach 'git config user.name &quot;TYPO3 v4 Release Team&quot;" />
+					command="git submodule foreach 'git config user.name &quot;TYPO3 v4 Release Team&quot;'" />
 				<exec logoutput="true" checkreturn="true"
 					dir="${project.localRepositoryDirectory}"
-					command="git submodule foreach 'git config user.email &quot;typo3v4@typo3.org&quot;" />
+					command="git submodule foreach 'git config user.email &quot;typo3v4@typo3.org&quot;'" />
 			</then>
 			<else>
 				<exec logoutput="true" checkreturn="true"
