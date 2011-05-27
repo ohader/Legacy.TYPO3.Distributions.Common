@@ -94,7 +94,7 @@
 
 		<!-- fix file permissions and make some files executable -->
 		<!-- Change ownership -->
-		<chown user="root" quiet="true" verbose="false">
+		<chown user="root:root" quiet="true" verbose="false">
 			<fileset dir="${project-permissions.directory}" />
 		</chown>
 
@@ -110,10 +110,10 @@
 		<chmod mode="0755" quiet="true" verbose="false">
 			<!-- Files that must be made executable -->
 			<fileset dir="${project-permissions.directory}">
-				<include name="*.phpcron" />
-				<include name="*.phpsh" />
-				<include name="*.sh" />
-				<include name="*.pl" />
+				<include name="**/*.phpcron" />
+				<include name="**/*.phpsh" />
+				<include name="**/*.sh" />
+				<include name="**/*.pl" />
 			</fileset>
 		</chmod>
 	</target>
