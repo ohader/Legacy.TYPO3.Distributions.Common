@@ -21,6 +21,7 @@
 <project name="TYPO3v4Submodules" basedir="." default="submodules">
 	<property name="common.baseDir" value="" override="true" />
 	<property name="common.taskPrefix" value="" override="true" />
+	<property name="submodules.start" value="TYPO3_4-2" />
 
 	<property name="project.distributionsDirectory" value="${project.basedir}/Distributions/" />
 
@@ -31,7 +32,7 @@
 			outputProperty="submodules.branchList"
 			command="git ls-remote --heads ${git.remoteRepository}" />
 		<typo3branchlist input="${submodules.branchList}"
-				start="TYPO3_4-2"
+				start="${submodules.start}"
 				property="submodules.branchList" />
 
 		<foreach target="submodules-action"
@@ -75,7 +76,7 @@
 					dir="${project.localRepositoryDirectory}"
 					command="git push origin HEAD:refs/for/${submodules-action.branch}/SUBMODULE" />
 
-				<!-- <phingcall target="repository-typo3-approve" /> -->
+				<phingcall target="repository-typo3-approve" />
 			</then>
 		</if>
 	</target>
