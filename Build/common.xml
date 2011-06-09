@@ -26,6 +26,7 @@
 	<taskdef name="typo3convertversion" classname="${common.taskPrefix}Tasks.Typo3ConvertVersionTask" />
 	<taskdef name="typo3convertwhitespaces" classname="${common.taskPrefix}Tasks.Typo3ConvertWhitespacesTask" />
 	<taskdef name="typo3gitinfo" classname="${common.taskPrefix}Tasks.Typo3GitInfoTask" />
+	<taskdef name="typo3branchlist" classname="${common.taskPrefix}Tasks.Typo3BranchListTask" />
 	<taskdef name="typo3filehash" classname="${common.taskPrefix}Tasks.Typo3FileHashTask" />
 	<taskdef name="typo3applist" classname="${common.taskPrefix}Tasks.Typo3AppListTask" />
 	<taskdef name="typo3gitchangelog" classname="${common.taskPrefix}Tasks.Typo3GitChangelogTask" />
@@ -167,41 +168,8 @@
 
 				<exec logoutput="true" checkreturn="true"
 					command="git clone --recursive ${git.remoteRepository} ${project.localRepositoryDirectory}" />
-				<!--
-				<gitclone
-					gitPath="${project.gitPath}"
-					repository="${git.remoteRepository}"
-					targetPath="${project.localRepositoryDirectory}" />
-				-->
 
-				<!-- Git configuration -->
-				<exec logoutput="true" checkreturn="true"
-					dir="${project.localRepositoryDirectory}"
-					command="git config remote.origin.pushurl '${git.pushUrl}'" />
-				<exec logoutput="true" checkreturn="true"
-					dir="${project.localRepositoryDirectory}"
-					command="git config user.name 'TYPO3 v4 Release Team'" />
-				<exec logoutput="true" checkreturn="true"
-					dir="${project.localRepositoryDirectory}"
-					command="git config user.email 'typo3v4@typo3.org'" />
-
-				<!-- Commit Hooks -->
-				<exec logoutput="true" checkreturn="true"
-					dir="${project.localRepositoryDirectory}"
-					command="${git.commitHookCommand}" />
-				<exec logoutput="true" checkreturn="true"
-					dir="${project.localRepositoryDirectory}"
-					command="git submodule foreach '${git.commitHookCommand}'" />
-				<!-- Git configuration for submodules -->
-				<exec logoutput="true" checkreturn="true"
-					dir="${project.localRepositoryDirectory}"
-					command="git submodule foreach 'git config url.&quot;ssh://review.typo3.org:29418&quot;.pushInsteadOf git://git.typo3.org'" />
-				<exec logoutput="true" checkreturn="true"
-					dir="${project.localRepositoryDirectory}"
-					command="git submodule foreach 'git config user.name &quot;TYPO3 v4 Release Team&quot;'" />
-				<exec logoutput="true" checkreturn="true"
-					dir="${project.localRepositoryDirectory}"
-					command="git submodule foreach 'git config user.email &quot;typo3v4@typo3.org&quot;'" />
+				<phingcall target="repository-initialize" />
 			</then>
 			<else>
 				<exec logoutput="true" checkreturn="true"
@@ -224,13 +192,45 @@
 					command="git fetch --tags" />
 				<exec logoutput="true" checkreturn="true"
 					dir="${project.localRepositoryDirectory}"
-					command="git submodule update --init" />
+					command="git submodule --quiet update --init" />
 				<!--
 				<gitpull repository="${git.remoteRepository}" gitPath="${project.gitPath}" />
 				-->
 			</else>
 		</if>
 	</target>
+
+	<target name="repository-initialize">
+		<!-- Git configuration -->
+		<exec logoutput="true" checkreturn="true"
+			dir="${project.localRepositoryDirectory}"
+			command="git config remote.origin.pushurl '${git.pushUrl}'" />
+		<exec logoutput="true" checkreturn="true"
+			dir="${project.localRepositoryDirectory}"
+			command="git config user.name 'TYPO3 v4 Release Team'" />
+		<exec logoutput="true" checkreturn="true"
+			dir="${project.localRepositoryDirectory}"
+			command="git config user.email 'typo3v4@typo3.org'" />
+
+		<!-- Commit Hooks -->
+		<exec logoutput="true" checkreturn="true"
+			dir="${project.localRepositoryDirectory}"
+			command="${git.commitHookCommand}" />
+		<exec logoutput="true" checkreturn="true"
+			dir="${project.localRepositoryDirectory}"
+			command="git submodule --quiet foreach '${git.commitHookCommand}'" />
+		<!-- Git configuration for submodules -->
+		<exec logoutput="true" checkreturn="true"
+			dir="${project.localRepositoryDirectory}"
+			command="git submodule --quiet foreach 'git config url.&quot;ssh://review.typo3.org:29418&quot;.pushInsteadOf git://git.typo3.org'" />
+		<exec logoutput="true" checkreturn="true"
+			dir="${project.localRepositoryDirectory}"
+			command="git submodule --quiet foreach 'git config user.name &quot;TYPO3 v4 Release Team&quot;'" />
+		<exec logoutput="true" checkreturn="true"
+			dir="${project.localRepositoryDirectory}"
+			command="git submodule --quiet foreach 'git config user.email &quot;typo3v4@typo3.org&quot;'" />
+	</target>
+
 
 	<target name="repository-select">
 		<fail unless="repository-select.branch" message="Property $repository-select.branch is required." />
