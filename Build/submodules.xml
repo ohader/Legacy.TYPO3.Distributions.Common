@@ -23,11 +23,15 @@
 	<property name="common.taskPrefix" value="" override="true" />
 	<property name="submodules.start" value="TYPO3_4-2" />
 
-	<property name="project.distributionsDirectory" value="${project.basedir}/Distributions/" />
+	<property name="submodules.workDirectory" value="${project.workDirectory}Submodules/" />
+	<property name="project.localRepositoryDirectory" value="${submodules.workDirectory}Core.git/" override="true" />
 
 	<import file="${project.basedir}/${common.baseDir}Build/common.xml" />
 
 	<target name="submodules">
+		<delete dir="${submodules.workDirectory}" quiet="true" />
+		<mkdir dir="${submodules.workDirectory}" />
+
 		<exec logoutput="false" checkreturn="false"
 			outputProperty="submodules.branchList"
 			command="git ls-remote --heads ${git.remoteRepository}" />
@@ -78,6 +82,9 @@
 
 				<phingcall target="repository-typo3-approve" />
 			</then>
+			<else>
+				<echo message="No updates required" />
+			</else>
 		</if>
 	</target>
 </project>

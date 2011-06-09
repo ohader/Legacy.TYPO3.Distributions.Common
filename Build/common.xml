@@ -40,7 +40,7 @@
 
 	<property name="project.targetsDirectory" value="${project.basedir}/Targets/" />
 	<property name="project.workDirectory" value="${project.basedir}/Work/" />
-	<property name="project.localRepositoryDirectory" value="${project.basedir}/Work/Core.git/" />
+	<property name="project.localRepositoryDirectory" value="${project.workDirectory}Core.git/" />
 	<property name="project.resourcesDirectory" value="${project.basedir}/Resources/" />
 	<property name="project.versionFile" value="t3lib/config_default.php" />
 
