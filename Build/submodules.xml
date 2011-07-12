@@ -59,7 +59,7 @@
 
 		<exec logoutput="true" checkreturn="true"
 			dir="${project.localRepositoryDirectory}"
-			command="git submodule --quiet foreach 'git checkout $(git branch -r --contains $(git log -1 --pretty=format:%H) | tail -1 | sed &quot;s,^ *origin/,,&quot;)'" />
+			command="git submodule --quiet foreach 'git checkout $(git branch -r --contains HEAD | perl -pe &quot;s#^.*->.*\$##gs&quot; | head -1 | perl -pe &quot;s#^.*?origin/([^\s]+).*\$#\1#s&quot;)'" />
 		<exec logoutput="true" checkreturn="true"
 			dir="${project.localRepositoryDirectory}"
 			command="git submodule --quiet foreach 'git pull'" />
