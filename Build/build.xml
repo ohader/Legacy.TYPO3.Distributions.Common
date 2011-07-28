@@ -20,18 +20,14 @@
 -->
 <project name="TYPO3v4Build" basedir="." default="build">
 	<property name="common.all" value="true" override="true" />
-	<property name="common.baseDir" value="" override="true" />
-	<property name="common.taskPrefix" value="" override="true" />
 
-	<property name="project.distributionsDirectory" value="${project.basedir}/Distributions/" />
-
-	<import file="${project.basedir}/${common.baseDir}Build/common.xml" />
+	<import file="${project.basedir}/Build/common.xml" />
 	<property name="common.isLoaded" value="true" override="true" />
 
-	<import file="${project.distributionsDirectory}Base/Build/build.xml" />
-	<import file="${project.distributionsDirectory}Blank/Build/build.xml" />
-	<import file="${project.distributionsDirectory}Blank/Build/dummy.xml" />
-	<import file="${project.distributionsDirectory}Introduction/Build/build.xml" />
+	<import file="${project.basedir}/Build/base.xml" />
+	<import file="${project.basedir}/Build/blank.xml" />
+	<import file="${project.basedir}/Build/dummy.xml" />
+	<import file="${project.basedir}/Build/introduction.xml" />
 
 	<target name="build" depends="common,project-initialize">
 		<if>
@@ -45,9 +41,7 @@
 		</if>
 
 		<!-- build Base -->
-		<phingcall target="base-execute">
-			<property name="project.resourcesDirectory" value="${project.distributionsDirectory}Base/Resources/" override="true" />
-		</phingcall>
+		<phingcall target="base-execute" />
 
 		<!-- build Blank or Dummy -->
 		<if>
@@ -58,14 +52,10 @@
 				<equals arg1="${common.major}" arg2="4.5" />
 			</or>
 			<then>
-				<phingcall target="dummy-execute">
-					<property name="project.resourcesDirectory" value="${project.distributionsDirectory}Blank/Resources/" override="true" />
-				</phingcall>
+				<phingcall target="dummy-execute" />
 			</then>
 			<else>
-				<phingcall target="blank-execute">
-					<property name="project.resourcesDirectory" value="${project.distributionsDirectory}Blank/Resources/" override="true" />
-				</phingcall>
+				<phingcall target="blank-execute" />
 			</else>
 		</if>
 
@@ -73,9 +63,7 @@
 		<if>
 			<isfalse value="${common.info.isOutdatedBranch}" />
 			<then>
-				<phingcall target="introduction-execute">
-					<property name="project.resourcesDirectory" value="${project.distributionsDirectory}Introduction/Resources/" override="true" />
-				</phingcall>
+				<phingcall target="introduction-execute" />
 			</then>
 		</if>
 

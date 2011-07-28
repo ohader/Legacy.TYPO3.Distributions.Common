@@ -20,16 +20,14 @@
 -->
 <project name="TYPO3v4Common" basedir="." default="common">
 	<property name="common.all" value="false" />
-	<property name="common.baseDir" value="Common/" />
-	<property name="common.taskPrefix" value="Common." />
 
-	<taskdef name="typo3convertversion" classname="${common.taskPrefix}Tasks.Typo3ConvertVersionTask" />
-	<taskdef name="typo3convertwhitespaces" classname="${common.taskPrefix}Tasks.Typo3ConvertWhitespacesTask" />
-	<taskdef name="typo3gitinfo" classname="${common.taskPrefix}Tasks.Typo3GitInfoTask" />
-	<taskdef name="typo3branchlist" classname="${common.taskPrefix}Tasks.Typo3BranchListTask" />
-	<taskdef name="typo3filehash" classname="${common.taskPrefix}Tasks.Typo3FileHashTask" />
-	<taskdef name="typo3applist" classname="${common.taskPrefix}Tasks.Typo3AppListTask" />
-	<taskdef name="typo3gitchangelog" classname="${common.taskPrefix}Tasks.Typo3GitChangelogTask" />
+	<taskdef name="typo3convertversion" classname="Tasks.Typo3ConvertVersionTask" />
+	<taskdef name="typo3convertwhitespaces" classname="Tasks.Typo3ConvertWhitespacesTask" />
+	<taskdef name="typo3gitinfo" classname="Tasks.Typo3GitInfoTask" />
+	<taskdef name="typo3branchlist" classname="Tasks.Typo3BranchListTask" />
+	<taskdef name="typo3filehash" classname="Tasks.Typo3FileHashTask" />
+	<taskdef name="typo3applist" classname="Tasks.Typo3AppListTask" />
+	<taskdef name="typo3gitchangelog" classname="Tasks.Typo3GitChangelogTask" />
 
 	<property name="git.remoteRepository" value="git://git.typo3.org/TYPO3v4/Core.git" />
 	<property name="git.commitHookCommand" value="scp -p -P 29418 review.typo3.org:hooks/commit-msg .git/hooks/" />
@@ -120,25 +118,44 @@
 	</target>
 
 	<target name="repository-export">
-		<fail unless="repository-export.gitName" message="Property $repository-export.gitName is required." />
-		<fail unless="repository-export.directory" message="Propery $repository-export.directory is required." />
+		<delete dir="${project.workDirectory}Temporary.git/" quiet="true" />
 
-		<delete dir="${repository-export.directory}" quiet="true" />
-		<mkdir dir="${repository-export.directory}" />
+		<fail unless="repository-export.gitName" message="Property $repository-dump.gitName is required." />
+		<fail unless="repository-export.gitRepository" message="Propery $repository-dump.gitRepository is required." />
+		<fail unless="repository-export.directory" message="Propery $repository-dump.directory is required." />
+
+		<exec logoutput="true" checkreturn="true"
+			command="git clone --recursive ${repository-export.gitRepository} ${project.workDirectory}Temporary.git/" />
+
+		<phingcall target="repository-dump">
+			<property name="repository-dump.gitDirectory" value="${project.workDirectory}Temporary.git/" />
+			<property name="repository-dump.gitName" value="${repository-export.gitName}" />
+			<property name="repository-dump.directory" value="${repository-export.directory}" />
+		</phingcall>
+	</target>
+
+	<target name="repository-dump">
+		<fail unless="repository-dump.gitName" message="Property $repository-dump.gitName is required." />
+		<fail unless="repository-dump.directory" message="Propery $repository-dump.directory is required." />
+		<property name="repository-dump.gitDirectory" value="${project.localRepositoryDirectory}" />
+
+		<delete dir="${repository-dump.directory}" quiet="true" />
+		<mkdir dir="${repository-dump.directory}" />
 
 		<phingcall target="repository-select">
-			<property name="repository-select.branch" value="${repository-export.gitName}" />
+			<property name="repository-select.branch" value="${repository-dump.gitName}" />
+			<property name="repository-select.gitDirectory" value="${repository-dump.gitDirectory}" />
 		</phingcall>
 
 		<exec logoutput="true" checkreturn="true"
-			dir="${project.localRepositoryDirectory}"
-			command="git checkout-index -a --prefix=${repository-export.directory}" />
+			dir="${repository-dump.gitDirectory}"
+			command="git checkout-index -a --prefix=${repository-dump.directory}" />
 		<exec logoutput="true" checkreturn="true"
-			dir="${project.localRepositoryDirectory}"
-			command="git submodule foreach 'git checkout-index -a --prefix=${repository-export.directory}$path/'" />
+			dir="${repository-dump.gitDirectory}"
+			command="git submodule foreach 'git checkout-index -a --prefix=${repository-dump.directory}$path/'" />
 
 		<delete includeemptydirs="true">
-			<fileset dir="${repository-export.directory}" defaultexcludes="false">
+			<fileset dir="${repository-dump.directory}" defaultexcludes="false">
 				<include name=".gitignore" />
 				<include name=".gitmodules" />
 				<include name="**/src" />
@@ -156,7 +173,6 @@
 			</fileset>
 		</delete>
 	</target>
-
 
 	<target name="repository-clone">
 		<available file="${project.localRepositoryDirectory}.git" type="dir" property="repository-clone.exists" />
@@ -234,13 +250,14 @@
 
 	<target name="repository-select">
 		<fail unless="repository-select.branch" message="Property $repository-select.branch is required." />
+		<property name="repository-select.gitDirectory" value="${project.localRepositoryDirectory}" />
 
 		<gitcheckout
 			gitPath="${project.gitPath}"
-			repository="${project.localRepositoryDirectory}"
+			repository="${repository-select.gitDirectory}"
 			branchname="${repository-select.branch}" />
 		<exec logoutput="true" checkreturn="true"
-			dir="${project.localRepositoryDirectory}"
+			dir="${repository-select.gitDirectory}"
 			command="git submodule update --init" />
 	</target>
 

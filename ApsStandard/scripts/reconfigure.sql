@@ -1,0 +1,1 @@
+UPDATE `be_users` SET `username`='@@ADMIN_NAME@@', `password`='@@ADMIN_PASSWORD@@' WHERE `uid`=1;

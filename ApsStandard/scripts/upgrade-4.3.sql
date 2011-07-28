@@ -1,0 +1,11 @@
+ALTER TABLE sys_filemounts ADD sorting int(11) unsigned NOT NULL default '0';
+ALTER TABLE fe_session_data ADD KEY tstamp (tstamp);
+ALTER TABLE fe_users ADD first_name varchar(50) NOT NULL default '';
+ALTER TABLE fe_users ADD middle_name varchar(50) NOT NULL default '';
+ALTER TABLE fe_users ADD last_name varchar(50) NOT NULL default '';
+ALTER TABLE tt_content ADD KEY language (l18n_parent,sys_language_uid);
+ALTER TABLE sys_log CHANGE details details text; 
+ALTER TABLE sys_template CHANGE include_static zzz_deleted_include_static tinytext;
+ALTER TABLE static_template RENAME zzz_deleted_static_template; 
+ALTER TABLE sys_template DROP zzz_deleted_include_static;
+DROP TABLE zzz_deleted_static_template;

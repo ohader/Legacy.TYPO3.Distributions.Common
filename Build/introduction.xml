@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ * This script belongs to the TYPO3 v4 build system.                      *
+ *                                                                        *
+ * It is free software; you can redistribute it and/or modify it under    *
+ * the terms of the GNU Lesser General Public License as published by the *
+ * Free Software Foundation, either version 3 of the License, or (at your *
+ * option) any later version.                                             *
+ *                                                                        *
+ * This script is distributed in the hope that it will be useful, but     *
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHAN-    *
+ * TABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser       *
+ * General Public License for more details.                               *
+ *                                                                        *
+ * You should have received a copy of the GNU Lesser General Public       *
+ * License along with the script.                                         *
+ * If not, see http://www.gnu.org/licenses/lgpl.html                      *
+ *                                                                        *
+ * The TYPO3 project - inspiring people to share!                         *
+-->
+<project name="TYPO3v4IntroductionPackage" basedir="." default="introduction">
+	<if>
+		<not><isset property="common.isLoaded" /></not>
+		<then><import file="${project.basedir}/Build/common.xml" /></then>
+	</if>
+
+	<property name="introduction.resourcesRepository" value="git://git.typo3.org/TYPO3v4/Distributions/Introduction.git" />
+	<property name="introduction.resourcesDirectory" value="${project.workDirectory}Resources/Introduction/" />
+	<property name="introduction.workDirectory" value="${project.workDirectory}Targets/Introduction/" />
+	<property name="introduction.apsStandardDirectory" value="${project.basedir}/ApsStandard/" />
+
+	<target name="introduction" depends="common,project-initialize,introduction-execute">
+		<phingcall target="project-md5" />
+		<phingcall target="publish-sourceforge">
+			<property name="publish-sourceforge.directory" value="TYPO3 ${introduction.versionName}" />
+		</phingcall>
+	</target>
+
+	<target name="introduction-execute">
+		<delete dir="${introduction.resourcesDirectory}" quiet="true" />
+		<mkdir dir="${introduction.resourcesDirectory}" />
+
+		<delete dir="${introduction.workDirectory}" quiet="true" />
+		<mkdir dir="${introduction.workDirectory}" />
+
+		<phingcall target="repository-export">
+			<property name="repository-export.gitName" value="master" />
+			<property name="repository-export.gitRepository" value="${introduction.resourcesRepository}" />
+			<property name="repository-export.directory" value="${introduction.resourcesDirectory}" />
+		</phingcall>
+
+		<if>
+			<equals arg1="${common.type}" arg2="snapshot" />
+			<then>
+				<property name="introduction.versionName" value="${common.major}-snapshot-${common.date}" />
+				<property name="introduction.gitName" value="${common.info.branchName}" />
+			</then>
+			<!-- if all distributions are called and thus a new base version was created -->
+			<elseif>
+				<istrue value="${common.all}" />
+				<then>
+					<fail unless="common.info.nextTag" message="There is no release tag available." />
+				<property name="introduction.versionName" value="${common.info.nextVersion}" />
+				<property name="introduction.gitName" value="${common.info.nextTag}" />
+				</then>
+			</elseif>
+			<else>
+				<fail unless="common.info.currentTag" message="There is no release tag available." />
+				<property name="introduction.versionName" value="${common.info.currentVersion}" />
+				<property name="introduction.gitName" value="${common.info.currentTag}" />
+			</else>
+		</if>
+
+		<property name="introduction.sourceName" value="typo3_src-${introduction.versionName}" />
+		<property name="introduction.packageName" value="introductionpackage-${introduction.versionName}" />
+		<property name="introduction.workAppDirectory" value="${introduction.workDirectory}${introduction.packageName}.app/" />
+		<property name="introduction.workBaseDirectory" value="${introduction.workDirectory}${introduction.packageName}/" />
+		<property name="introduction.workSourceDirectory" value="${introduction.workDirectory}${introduction.sourceName}/" />
+		<property name="introduction.prefixDirectory" value="${introduction.packageName}/" />
+
+		<phingcall target="repository-dump">
+			<property name="repository-dump.gitName" value="${introduction.gitName}" />
+			<property name="repository-dump.directory" value="${introduction.workSourceDirectory}" />
+		</phingcall>
+		
+		<phingcall target="introduction-package-linked" />
+		<phingcall target="introduction-package-raw" />
+		<!-- <phingcall target="introduction-package-app" /> -->
+	</target>
+
+	<target name="introduction-resources">
+		<fail unless="introduction-resources.directory" message="You must set the $introduction-resources.directory for this target" />
+
+		<copy todir="${introduction-resources.directory}">
+			<fileset dir="${introduction.resourcesDirectory}" />
+		</copy>
+	</target>
+
+	<target name="introduction-package-linked">
+		<delete dir="${introduction.workBaseDirectory}" quiet="true" />
+		<mkdir dir="${introduction.workBaseDirectory}" />
+
+		<phingcall target="introduction-resources">
+			<property name="introduction-resources.directory" value="${introduction.workBaseDirectory}" />
+		</phingcall>
+
+		<copy todir="${introduction.workBaseDirectory}${introduction.sourceName}/">
+			<fileset dir="${introduction.workSourceDirectory}" />
+		</copy>
+
+		<symlink target="${introduction.sourceName}/" link="${introduction.workBaseDirectory}typo3_src" />
+		<symlink target="typo3_src/index.php" link="${introduction.workBaseDirectory}index.php" />
+		<symlink target="typo3_src/t3lib" link="${introduction.workBaseDirectory}t3lib" />
+		<symlink target="typo3_src/typo3" link="${introduction.workBaseDirectory}typo3" />
+
+		<phingcall target="project-permissions">
+			<property name="project-permissions.directory" value="${introduction.workBaseDirectory}" />
+		</phingcall>
+
+		<delete file="${project.targetsDirectory}${introduction.packageName}.tar.gz" quiet="true"/>
+		<echo message="Creating ${introduction.packageName}.tar.gz" />
+		<exec logoutput="true" checkreturn="true"
+			command="cd ${introduction.workDirectory}; tar -czf ${project.targetsDirectory}${introduction.packageName}.tar.gz ${introduction.prefixDirectory}" />
+	</target>
+
+	<target name="introduction-package-raw">
+		<delete dir="${introduction.workBaseDirectory}" quiet="true" />
+		<mkdir dir="${introduction.workBaseDirectory}" />
+
+		<copy todir="${introduction.workBaseDirectory}">
+			<fileset dir="${introduction.workSourceDirectory}" />
+		</copy>
+
+		<phingcall target="introduction-resources">
+			<property name="introduction-resources.directory" value="${introduction.workBaseDirectory}" />
+		</phingcall>
+
+		<phingcall target="project-permissions">
+			<property name="project-permissions.directory" value="${introduction.workBaseDirectory}" />
+		</phingcall>
+
+		<delete file="${project.targetsDirectory}${introduction.packageName}.zip" quiet="true"/>
+		<echo message="Creating ${introduction.packageName}.zip" />
+		<exec logoutput="true" checkreturn="true"
+			command="cd ${introduction.workDirectory}; zip -rq9 ${project.targetsDirectory}${introduction.packageName}.zip ${introduction.prefixDirectory}" />
+	</target>
+
+	<target name="introduction-package-app">
+		<!-- TODO needs to be changed/moved -->
+
+		<delete dir="${introduction.workAppDirectory}" quiet="true" />
+		<mkdir dir="${introduction.workAppDirectory}" />
+		<mkdir dir="${introduction.workAppDirectory}htdocs/" />
+
+		<copy todir="${introduction.workAppDirectory}">
+			<fileset dir="${introduction.apsStandardDirectory}" />
+			<filterchain>
+				<replaceregexp>
+					<regexp pattern="###T3VERSION###" replace="${introduction.versionName}" />
+				</replaceregexp>
+			</filterchain>
+		</copy>
+
+		<copy todir="${introduction.workAppDirectory}htdocs/">
+			<fileset dir="${introduction.workSourceDirectory}" />
+		</copy>
+
+		<phingcall target="introduction-resources">
+			<property name="introduction-resources.directory" value="${introduction.workAppDirectory}htdocs/" />
+		</phingcall>
+
+		<phingcall target="project-permissions">
+			<property name="project-permissions.directory" value="${introduction.workAppDirectory}htdocs/" />
+		</phingcall>
+
+		<typo3applist file="${introduction.workAppDirectory}APP-LIST.xml">
+			<fileset dir="${introduction.workAppDirectory}">
+				<include name="APP-META.xml" />
+			</fileset>
+			<fileset dir="${introduction.workAppDirectory}htdocs/" />
+			<fileset dir="${introduction.workAppDirectory}scripts/" />
+			<fileset dir="${introduction.workAppDirectory}images/" />
+			<fileset dir="${introduction.workAppDirectory}test/" />
+		</typo3applist>
+
+		<delete file="${project.targetsDirectory}${introduction.packageName}.app.zip" quiet="true"/>
+
+		<echo message="Creating ${introduction.packageName}.app.zip" />
+		<exec logoutput="true" checkreturn="true"
+			command="zip -rq9 ${project.targetsDirectory}${introduction.packageName}.app.zip ${introduction.workAppDirectory}" />
+	</target>
+</project>

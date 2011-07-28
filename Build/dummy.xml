@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ * This script belongs to the TYPO3 v4 build system.                      *
+ *                                                                        *
+ * It is free software; you can redistribute it and/or modify it under    *
+ * the terms of the GNU Lesser General Public License as published by the *
+ * Free Software Foundation, either version 3 of the License, or (at your *
+ * option) any later version.                                             *
+ *                                                                        *
+ * This script is distributed in the hope that it will be useful, but     *
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHAN-    *
+ * TABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser       *
+ * General Public License for more details.                               *
+ *                                                                        *
+ * You should have received a copy of the GNU Lesser General Public       *
+ * License along with the script.                                         *
+ * If not, see http://www.gnu.org/licenses/lgpl.html                      *
+ *                                                                        *
+ * The TYPO3 project - inspiring people to share!                         *
+-->
+<project name="TYPO3v4DummyPackage" basedir="." default="dummy">
+	<if>
+		<not><isset property="common.isLoaded" /></not>
+		<then><import file="${project.basedir}/Build/common.xml" /></then>
+	</if>
+
+	<property name="dummy.resourcesRepository" value="git://git.typo3.org/TYPO3v4/Distributions/Blank.git" />
+	<property name="dummy.resourcesDirectory" value="${project.workDirectory}Resources/Dummy/" />
+	<property name="dummy.workDirectory" value="${project.workDirectory}Targets/Dummy/" />
+
+	<target name="dummy" depends="common,project-initialize,dummy-execute">
+		<phingcall target="project-md5" />
+		<phingcall target="publish-sourceforge">
+			<property name="publish-sourceforge.directory" value="TYPO3 ${dummy.versionName}" />
+		</phingcall>
+	</target>
+
+	<target name="dummy-execute">
+		<delete dir="${dummy.resourcesDirectory}" quiet="true" />
+		<mkdir dir="${dummy.resourcesDirectory}" />
+
+		<delete dir="${dummy.workDirectory}" quiet="true" />
+		<mkdir dir="${dummy.workDirectory}" />
+
+		<phingcall target="repository-export">
+			<property name="repository-export.gitName" value="master" />
+			<property name="repository-export.gitRepository" value="${dummy.resourcesRepository}" />
+			<property name="repository-export.directory" value="${dummy.resourcesDirectory}" />
+		</phingcall>
+
+		<if>
+			<equals arg1="${common.type}" arg2="snapshot" />
+			<then>
+				<property name="dummy.versionName" value="${common.major}-snapshot-${common.date}" />
+				<property name="dummy.gitName" value="${common.info.branchName}" />
+			</then>
+			<!-- if all distributions are called and thus a new base version was created -->
+			<elseif>
+				<istrue value="${common.all}" />
+				<then>
+					<fail unless="common.info.nextTag" message="There is no release tag available." />
+					<property name="dummy.versionName" value="${common.info.nextVersion}" />
+					<property name="dummy.gitName" value="${common.info.nextTag}" />
+				</then>
+			</elseif>
+			<else>
+				<fail unless="common.info.currentTag" message="There is no release tag available." />
+				<property name="dummy.versionName" value="${common.info.currentVersion}" />
+				<property name="dummy.gitName" value="${common.info.currentTag}" />
+			</else>
+		</if>
+
+		<property name="dummy.sourceName" value="typo3_src-${dummy.versionName}" />
+		<property name="dummy.packageName" value="dummy-${dummy.versionName}" />
+		<property name="dummy.sourcePackageName" value="typo3_src+dummy-${dummy.versionName}" />
+		<property name="dummy.workSourceBaseDirectory" value="${dummy.workDirectory}${dummy.sourcePackageName}/" />
+		<property name="dummy.workBaseDirectory" value="${dummy.workDirectory}${dummy.packageName}/" />
+		<property name="dummy.workSourceDirectory" value="${dummy.workDirectory}${dummy.sourceName}/" />
+		<property name="dummy.prefixDirectory" value="${dummy.packageName}/" />
+		<property name="dummy.sourcePrefixDirectory" value="${dummy.sourcePackageName}/" />
+
+		<phingcall target="repository-dump">
+			<property name="repository-dump.gitName" value="${dummy.gitName}" />
+			<property name="repository-dump.directory" value="${dummy.workSourceDirectory}" />
+		</phingcall>
+		
+		<phingcall target="dummy-package-linked" />
+		<phingcall target="dummy-package-small" />
+		<phingcall target="dummy-package-raw" />
+	</target>
+
+	<target name="dummy-resources">
+		<fail unless="dummy-resources.directory" message="You must set the $dummy-resources.directory for this target" />
+
+		<copy todir="${dummy-resources.directory}">
+			<fileset dir="${dummy.resourcesDirectory}" />
+		</copy>
+	</target>
+
+	<target name="dummy-package-linked">
+		<delete dir="${dummy.workBaseDirectory}" quiet="true" />
+		<mkdir dir="${dummy.workBaseDirectory}" />
+
+		<phingcall target="dummy-resources">
+			<property name="dummy-resources.directory" value="${dummy.workBaseDirectory}" />
+		</phingcall>
+
+		<symlink target="../${dummy.sourceName}/" link="${dummy.workBaseDirectory}typo3_src" />
+		<symlink target="typo3_src/index.php" link="${dummy.workBaseDirectory}index.php" />
+		<symlink target="typo3_src/t3lib" link="${dummy.workBaseDirectory}t3lib" />
+		<symlink target="typo3_src/typo3" link="${dummy.workBaseDirectory}typo3" />
+
+		<phingcall target="project-permissions">
+			<property name="project-permissions.directory" value="${dummy.workBaseDirectory}" />
+		</phingcall>
+
+		<delete file="${project.targetsDirectory}${dummy.packageName}.tar.gz" quiet="true"/>
+		<echo message="Creating ${dummy.packageName}.tar.gz" />
+		<exec logoutput="true" checkreturn="true"
+			command="cd ${dummy.workDirectory}; tar -czf ${project.targetsDirectory}${dummy.packageName}.tar.gz ${dummy.prefixDirectory}" />
+	</target>
+
+	<target name="dummy-package-small">
+		<delete dir="${dummy.workBaseDirectory}" quiet="true" />
+		<mkdir dir="${dummy.workBaseDirectory}" />
+
+		<phingcall target="dummy-resources">
+			<property name="dummy-resources.directory" value="${dummy.workBaseDirectory}" />
+		</phingcall>
+
+		<phingcall target="project-permissions">
+			<property name="project-permissions.directory" value="${dummy.workBaseDirectory}" />
+		</phingcall>
+
+		<delete file="${project.targetsDirectory}${dummy.packageName}.zip" quiet="true"/>
+		<echo message="Creating ${dummy.packageName}.zip" />
+		<exec logoutput="true" checkreturn="true"
+			command="cd ${dummy.workDirectory}; zip -rq9 ${project.targetsDirectory}${dummy.packageName}.zip ${dummy.prefixDirectory}" />
+	</target>
+
+	<target name="dummy-package-raw">
+		<delete dir="${dummy.workSourceBaseDirectory}" quiet="true" />
+		<mkdir dir="${dummy.workSourceBaseDirectory}" />
+
+		<copy todir="${dummy.workSourceBaseDirectory}">
+			<fileset dir="${dummy.workSourceDirectory}" />
+		</copy>
+
+		<phingcall target="dummy-resources">
+			<property name="dummy-resources.directory" value="${dummy.workSourceBaseDirectory}" />
+		</phingcall>
+
+		<phingcall target="project-permissions">
+			<property name="project-permissions.directory" value="${dummy.workSourceBaseDirectory}" />
+		</phingcall>
+
+		<delete file="${project.targetsDirectory}${dummy.sourcePackageName}.zip" quiet="true"/>
+		<echo message="Creating ${dummy.sourcePackageName}.zip" />
+		<exec logoutput="true" checkreturn="true"
+			command="cd ${dummy.workDirectory}; zip -rq9 ${project.targetsDirectory}${dummy.sourcePackageName}.zip ${dummy.sourcePrefixDirectory}" />
+	</target>
+</project>

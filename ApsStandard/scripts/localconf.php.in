@@ -1,0 +1,27 @@
+<?php
+$TYPO3_CONF_VARS['SYS']['sitename'] = '@@TITLE@@';
+
+	// Default password is "joh316" :
+$TYPO3_CONF_VARS['BE']['installToolPassword'] = '@@ADMIN_PASSWORD@@';
+
+$TYPO3_CONF_VARS['EXT']['extList'] = 'cms,lang,sv,tsconfig_help,context_help,extra_page_cm_options,impexp,sys_note,tstemplate,tstemplate_ceditor,tstemplate_info,tstemplate_objbrowser,tstemplate_analyzer,func_wizards,wizard_crpages,wizard_sortpages,lowlevel,install,belog,beuser,aboutmodules,setup,taskcenter,info_pagetsconfig,viewpage,rtehtmlarea,css_styled_content,t3skin,about,cshmanual,feedit,opendocs,recycler,t3editor,reports,scheduler,simulatestatic,version';
+
+$typo_db_extTableDef_script = 'extTables.php';
+
+## INSTALL SCRIPT EDIT POINT TOKEN - all lines after this points may be changed by the install script!
+
+$typo_db_username = '@@DB_MAIN_LOGIN@@';	//  Modified or inserted by TYPO3 Install Tool.
+$typo_db_password = '@@DB_MAIN_PASSWORD@@';	//  Modified or inserted by TYPO3 Install Tool.
+$typo_db_host = '@@DB_MAIN_ADDRESS@@';	//  Modified or inserted by TYPO3 Install Tool.
+$TYPO3_CONF_VARS['SYS']['sitename'] = '@@TITLE@@';	//  Modified or inserted by TYPO3 Install Tool.
+$TYPO3_CONF_VARS['SYS']['encryptionKey'] = '@@ENCRYPTION_KEY@@';	//  Modified or inserted by TYPO3 Install Tool.
+$TYPO3_CONF_VARS['GFX']["im"] = '0';	//  Modified or inserted by TYPO3 Install Tool.
+$TYPO3_CONF_VARS['GFX']['im_combine_filename'] = '';	//  Modified or inserted by TYPO3 Install Tool.
+$TYPO3_CONF_VARS['GFX']["im_path"] = '';	//  Modified or inserted by TYPO3 Install Tool.
+$TYPO3_CONF_VARS['GFX']["im_path_lzw"] = '';	//  Modified or inserted by TYPO3 Install Tool.
+$typo_db = '@@DB_MAIN_NAME@@';	//  Modified or inserted by TYPO3 Install Tool.
+$TYPO3_CONF_VARS['FE']['disableNoCacheParameter'] = '0';	//  Modified or inserted by TYPO3 Install Tool.
+$TYPO3_CONF_VARS["SYS"]["compat_version"] = '@@COMPAT_VER@@';     //  Modified or inserted by TYPO3 Install Tool.
+$TYPO3_CONF_VARS['BE']['disable_exec_function'] = '1';  //  Modified or inserted by TYPO3 Install Tool.
+$TYPO3_CONF_VARS['GFX']['gdlib_png'] = '1';     // Modified or inserted by TYPO3 Install Tool.
+?>

@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ * This script belongs to the TYPO3 v4 build system.                      *
+ *                                                                        *
+ * It is free software; you can redistribute it and/or modify it under    *
+ * the terms of the GNU Lesser General Public License as published by the *
+ * Free Software Foundation, either version 3 of the License, or (at your *
+ * option) any later version.                                             *
+ *                                                                        *
+ * This script is distributed in the hope that it will be useful, but     *
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHAN-    *
+ * TABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser       *
+ * General Public License for more details.                               *
+ *                                                                        *
+ * You should have received a copy of the GNU Lesser General Public       *
+ * License along with the script.                                         *
+ * If not, see http://www.gnu.org/licenses/lgpl.html                      *
+ *                                                                        *
+ * The TYPO3 project - inspiring people to share!                         *
+-->
+<project name="TYPO3v4Base" basedir="." default="base">
+	<if>
+		<not><isset property="common.isLoaded" /></not>
+		<then><import file="${project.basedir}/Build/common.xml" /></then>
+	</if>
+
+	<property name="base.resourcesRepository" value="git://git.typo3.org/TYPO3v4/Distributions/Base.git" />
+	<property name="base.resourcesDirectory" value="${project.workDirectory}Resources/Base/" />
+	<property name="base.workDirectory" value="${project.workDirectory}Targets/Base/" />
+
+	<target name="base" depends="common,project-initialize,base-execute">
+		<phingcall target="project-md5" />
+		<phingcall target="publish-sourceforge">
+			<property name="publish-sourceforge.directory" value="TYPO3 ${base.versionName}" />
+		</phingcall>
+	</target>
+
+	<target name="base-target" depends="common,project-initialize">
+		<if>
+			<equals arg1="${common.type}" arg2="snapshot" />
+			<then>
+				<property name="base.versionName" value="${common.major}-snapshot-${common.date}" />
+				<property name="base.gitName" value="${common.info.branchName}" />
+			</then>
+			<else>
+				<fail unless="common.info.currentTag" message="There is no release tag available." />
+				<property name="base.versionName" value="${common.info.currentVersion}" />
+				<property name="base.gitName" value="${common.info.currentTag}" />
+			</else>
+		</if>
+
+		<property name="base.packageName" value="typo3_src-${base.versionName}" />
+		<property name="base.workBaseDirectory" value="${base.workDirectory}${base.packageName}/" />
+		<property name="base.prefixDirectory" value="${base.packageName}/" />
+
+		<phingcall target="base-package" />
+		<phingcall target="publish-sourceforge">
+			<property name="publish-sourceforge.directory" value="TYPO3 ${base.versionName}" />
+		</phingcall>
+	</target>
+
+	<target name="base-execute">
+		<delete dir="${base.resourcesDirectory}" quiet="true" />
+		<mkdir dir="${base.resourcesDirectory}" />
+
+		<delete dir="${base.workDirectory}" quiet="true" />
+		<mkdir dir="${base.workDirectory}" />
+
+		<phingcall target="repository-export">
+			<property name="repository-export.gitName" value="master" />
+			<property name="repository-export.gitRepository" value="${base.resourcesRepository}" />
+			<property name="repository-export.directory" value="${base.resourcesDirectory}" />
+		</phingcall>
+
+		<if>
+			<equals arg1="${common.type}" arg2="snapshot" />
+			<then>
+				<property name="base.versionName" value="${common.major}-snapshot-${common.date}" />
+				<property name="base.gitName" value="${common.info.branchName}" />
+				<phingcall target="base-snapshot" />
+			</then>
+			<else>
+				<property name="base.versionName" value="${common.info.nextVersion}" />
+				<property name="base.gitName" value="${common.info.nextTag}" />
+				<phingcall target="base-other" />
+			</else>
+		</if>
+
+		<property name="base.packageName" value="typo3_src-${base.versionName}" />
+		<property name="base.workBaseDirectory" value="${base.workDirectory}${base.packageName}/" />
+		<property name="base.prefixDirectory" value="${base.packageName}/" />
+
+		<phingcall target="base-package" />
+	</target>
+
+	<target name="base-bootstrap">
+		<!-- set version in t3lib/config_default.php -->
+		<phingcall target="repository-typo3-version">
+			<property name="repository-typo3-version.set" value="${base.versionName}" />
+			<property name="repository-typo3-version.branch" value="${common.info.branchName}" />
+		</phingcall>
+
+		<!-- commit change to have it in the log as well -->
+		<exec logoutput="true" checkreturn="true"
+			dir="${project.localRepositoryDirectory}"
+			command="git commit -a -m '[RELEASE] Release of TYPO3 ${base.versionName}' --author='${git.author}'" />
+
+		<!-- create the changelog with the previous version change commit -->
+		<phingcall target="repository-typo3-changelog">
+			<property name="repository-typo3-changelog.branch" value="${common.info.branchName}" />
+			<property name="repository-typo3-changelog.file" value="${project.localRepositoryDirectory}ChangeLog" />
+		</phingcall>
+
+		<!-- commit, but amend the changelog -->
+		<exec logoutput="true" checkreturn="true"
+			dir="${project.localRepositoryDirectory}"
+			command="git commit --amend -a -m '[RELEASE] Release of TYPO3 ${base.versionName}' --author='${git.author}'" />
+	</target>
+
+	<target name="base-snapshot">
+		<phingcall target="base-bootstrap" />
+	</target>
+
+	<target name="base-other">
+		<phingcall target="base-bootstrap" />
+
+		<!-- push everything to the repository -->
+		<phingcall target="repository-typo3-push">
+			<property name="repository-typo3-push.branch" value="${common.info.branchName}" />
+		</phingcall>
+
+		<!-- create an accordant tag which will be used to create the package -->
+		<phingcall target="repository-typo3-tag">
+			<property name="repository-typo3-tag.tag" value="${common.info.nextTag}" />
+			<property name="repository-typo3-tag.branch" value="${common.info.branchName}" />
+			<property name="repository-typo3-tag.version" value="${common.info.nextVersion}" />
+		</phingcall>
+
+		<!-- @todo Take care of creating new branches -->
+
+		<!-- set version in t3lib/config_default.php to next version -->
+		<phingcall target="repository-typo3-version">
+			<property name="repository-typo3-version.set" value="${common.info.successorVersion}-dev" />
+			<property name="repository-typo3-version.branch" value="${common.info.branchName}" />
+		</phingcall>
+
+		<!-- commit change to have it in the log as well -->
+		<exec logoutput="true" checkreturn="true"
+			dir="${project.localRepositoryDirectory}"
+			command="git commit -a -m '[TASK] Set TYPO3 version to ${common.info.successorVersion}-dev' --author='${git.author}'" />
+
+		<!-- push everything to the repository -->
+		<phingcall target="repository-typo3-push">
+			<property name="repository-typo3-push.branch" value="${common.info.branchName}" />
+		</phingcall>
+	</target>
+
+	<target name="base-package">
+		<delete dir="${base.workDirectory}" quiet="true" />
+		<mkdir dir="${base.workDirectory}" />
+
+		<phingcall target="repository-dump">
+			<property name="repository-dump.gitName" value="${base.gitName}" />
+			<property name="repository-dump.directory" value="${base.workBaseDirectory}" />
+		</phingcall>
+
+		<copy todir="${base.workBaseDirectory}">
+			<fileset dir="${base.resourcesDirectory}" />
+		</copy>
+
+		<phingcall target="project-permissions">
+			<property name="project-permissions.directory" value="${base.workBaseDirectory}" />
+		</phingcall>
+
+		<delete file="${project.targetsDirectory}${base.packageName}.tar.gz" quiet="true"/>
+		<echo message="Creating ${base.packageName}.tar.gz" />
+		<exec logoutput="true" checkreturn="true"
+			command="cd ${base.workDirectory}; tar -czf ${project.targetsDirectory}${base.packageName}.tar.gz ${base.prefixDirectory}" />
+
+		<delete file="${project.targetsDirectory}${base.packageName}.zip" quiet="true"/>
+		<echo message="Creating ${base.packageName}.zip" />
+		<exec logoutput="true" checkreturn="true"
+			command="cd ${base.workDirectory}; zip -rq9 ${project.targetsDirectory}${base.packageName}.zip ${base.prefixDirectory}" />
+	</target>	
+</project>

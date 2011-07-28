@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head profile="http://selenium-ide.openqa.org/profiles/test-case">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<link rel="selenium.base" href="http://cms70.aps-test.apache.web/" />
+<title>typo3AdminIDEtest</title>
+</head>
+<body>
+<table cellpadding="1" cellspacing="1" border="1">
+<thead>
+<tr><td rowspan="1" colspan="3">typo3AdminIDEtest</td></tr>
+</thead><tbody>
+<tr>
+	<td>click</td>
+	<td>t3-username</td>
+	<td></td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>t3-username</td>
+	<td>@@SETTINGS_admin_name@@</td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>t3-password</td>
+	<td></td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>t3-password</td>
+	<td>@@SETTINGS_admin_password@@</td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>t3-login-submit</td>
+	<td></td>
+</tr>
+<tr>
+	<td>waitForTextPresent</td>
+	<td>Page</td>
+	<td></td>
+</tr>
+<tr>
+	<td>selectFrame</td>
+	<td>content</td>
+	<td></td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>link=Page</td>
+	<td></td>
+</tr>
+<tr>
+	<td>pause</td>
+	<td>700</td>
+	<td></td>
+</tr>
+<tr>
+	<td>waitForFrameToLoad</td>
+	<td>content</td>
+	<td></td>
+</tr>
+<tr>
+	<td>selectFrame</td>
+	<td>content</td>
+	<td></td>
+</tr>
+<tr>
+	<td>selectFrame</td>
+	<td>nav_frame</td>
+	<td></td>
+</tr>
+<tr>
+	<td>waitForTextPresent</td>
+	<td>@@SETTINGS_title@@</td>
+	<td></td>
+</tr>
+<tr>
+	<td>selectFrame</td>
+	<td>relative=up</td>
+	<td></td>
+</tr>
+<tr>
+	<td>selectFrame</td>
+	<td>relative=up</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>//input[contains(@value,'Logout')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>waitForTextPresent</td>
+	<td>Password</td>
+	<td></td>
+</tr>
+
+</tbody></table>
+</body>
+</html>
+
+

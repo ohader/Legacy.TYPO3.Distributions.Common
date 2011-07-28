@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ * This script belongs to the TYPO3 v4 build system.                      *
+ *                                                                        *
+ * It is free software; you can redistribute it and/or modify it under    *
+ * the terms of the GNU Lesser General Public License as published by the *
+ * Free Software Foundation, either version 3 of the License, or (at your *
+ * option) any later version.                                             *
+ *                                                                        *
+ * This script is distributed in the hope that it will be useful, but     *
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHAN-    *
+ * TABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser       *
+ * General Public License for more details.                               *
+ *                                                                        *
+ * You should have received a copy of the GNU Lesser General Public       *
+ * License along with the script.                                         *
+ * If not, see http://www.gnu.org/licenses/lgpl.html                      *
+ *                                                                        *
+ * The TYPO3 project - inspiring people to share!                         *
+-->
+<project name="TYPO3v4BlankPackage" basedir="." default="blank">
+	<if>
+		<not><isset property="common.isLoaded" /></not>
+		<then><import file="${project.basedir}/Build/common.xml" /></then>
+	</if>
+
+	<property name="blank.resourcesRepository" value="git://git.typo3.org/TYPO3v4/Distributions/Blank.git" />
+	<property name="blank.resourcesDirectory" value="${project.workDirectory}Resources/Blank/" />
+	<property name="blank.workDirectory" value="${project.workDirectory}Targets/Blank/" />
+
+	<target name="blank" depends="common,project-initialize,blank-execute">
+		<phingcall target="project-md5" />
+		<phingcall target="publish-sourceforge">
+			<property name="publish-sourceforge.directory" value="TYPO3 ${blank.versionName}" />
+		</phingcall>
+	</target>
+
+	<target name="blank-execute">
+		<delete dir="${blank.resourcesDirectory}" quiet="true" />
+		<mkdir dir="${blank.resourcesDirectory}" />
+
+		<delete dir="${blank.workDirectory}" quiet="true" />
+		<mkdir dir="${blank.workDirectory}" />
+
+		<phingcall target="repository-export">
+			<property name="repository-export.gitName" value="master" />
+			<property name="repository-export.gitRepository" value="${blank.resourcesRepository}" />
+			<property name="repository-export.directory" value="${blank.resourcesDirectory}" />
+		</phingcall>
+
+		<if>
+			<equals arg1="${common.type}" arg2="snapshot" />
+			<then>
+				<property name="blank.versionName" value="${common.major}-snapshot-${common.date}" />
+				<property name="blank.gitName" value="${common.info.branchName}" />
+			</then>
+			<!-- if all distributions are called and thus a new base version was created -->
+			<elseif>
+				<istrue value="${common.all}" />
+				<then>
+					<fail unless="common.info.nextTag" message="There is no release tag available." />
+					<property name="blank.versionName" value="${common.info.nextVersion}" />
+					<property name="blank.gitName" value="${common.info.nextTag}" />
+				</then>
+			</elseif>
+			<else>
+				<fail unless="common.info.currentTag" message="There is no release tag available." />
+				<property name="blank.versionName" value="${common.info.currentVersion}" />
+				<property name="blank.gitName" value="${common.info.currentTag}" />
+			</else>
+		</if>
+
+		<property name="blank.sourceName" value="typo3_src-${blank.versionName}" />
+		<property name="blank.packageName" value="blankpackage-${blank.versionName}" />
+		<property name="blank.workBaseDirectory" value="${blank.workDirectory}${blank.packageName}/" />
+		<property name="blank.workSourceDirectory" value="${blank.workDirectory}${blank.sourceName}/" />
+		<property name="blank.prefixDirectory" value="${blank.packageName}/" />
+
+		<phingcall target="repository-dump">
+			<property name="repository-dump.gitName" value="${blank.gitName}" />
+			<property name="repository-dump.directory" value="${blank.workSourceDirectory}" />
+		</phingcall>
+		
+		<phingcall target="blank-package-linked" />
+		<phingcall target="blank-package-raw" />
+	</target>
+
+	<target name="blank-resources">
+		<fail unless="blank-resources.directory" message="You must set the $blank-resources.directory for this target" />
+
+		<copy todir="${blank-resources.directory}">
+			<fileset dir="${blank.resourcesDirectory}" />
+		</copy>
+	</target>
+
+	<target name="blank-package-linked">
+		<delete dir="${blank.workBaseDirectory}" quiet="true" />
+		<mkdir dir="${blank.workBaseDirectory}" />
+
+		<phingcall target="blank-resources">
+			<property name="blank-resources.directory" value="${blank.workBaseDirectory}" />
+		</phingcall>
+
+		<copy todir="${blank.workBaseDirectory}${blank.sourceName}/">
+			<fileset dir="${blank.workSourceDirectory}" />
+		</copy>
+
+		<symlink target="${blank.sourceName}/" link="${blank.workBaseDirectory}typo3_src" />
+		<symlink target="typo3_src/index.php" link="${blank.workBaseDirectory}index.php" />
+		<symlink target="typo3_src/t3lib" link="${blank.workBaseDirectory}t3lib" />
+		<symlink target="typo3_src/typo3" link="${blank.workBaseDirectory}typo3" />
+
+		<phingcall target="project-permissions">
+			<property name="project-permissions.directory" value="${blank.workBaseDirectory}" />
+		</phingcall>
+
+		<delete file="${project.targetsDirectory}${blank.packageName}.tar.gz" quiet="true"/>
+		<echo message="Creating ${blank.packageName}.tar.gz" />
+		<exec logoutput="true" checkreturn="true"
+			command="cd ${blank.workDirectory}; tar -czf ${project.targetsDirectory}${blank.packageName}.tar.gz ${blank.prefixDirectory}" />
+	</target>
+
+	<target name="blank-package-raw">
+		<delete dir="${blank.workBaseDirectory}" quiet="true" />
+		<mkdir dir="${blank.workBaseDirectory}" />
+
+		<copy todir="${blank.workBaseDirectory}">
+			<fileset dir="${blank.workSourceDirectory}" />
+		</copy>
+
+		<phingcall target="blank-resources">
+			<property name="blank-resources.directory" value="${blank.workBaseDirectory}" />
+		</phingcall>
+
+		<phingcall target="project-permissions">
+			<property name="project-permissions.directory" value="${blank.workBaseDirectory}" />
+		</phingcall>
+
+		<delete file="${project.targetsDirectory}${blank.packageName}.zip" quiet="true"/>
+		<echo message="Creating ${blank.packageName}.zip" />
+		<exec logoutput="true" checkreturn="true"
+			command="cd ${blank.workDirectory}; zip -rq9 ${project.targetsDirectory}${blank.packageName}.zip ${blank.prefixDirectory}" />
+	</target>
+</project>

@@ -1,0 +1,128 @@
+<application xmlns="http://apstandard.com/ns/1">
+	<name>typo3</name>
+	<packager-uri>http://typo3.org/</packager-uri>
+	<version>###T3VERSION###</version>
+	<release>1</release>
+	<homepage>http://typo3.org/</homepage>
+	<package-homepage>http://typo3.org/</package-homepage>
+	<default-prefix>typo3</default-prefix>
+
+	<summary>Free and Open Source Enterprise Content Management System</summary>
+	<description>
+		TYPO3 is developed by the Danish programmer Kasper Skaarhoej. It is the
+		most advanced GPL Content Management Framework available, and competes
+		very successfully with commercial products costing US $50.000. TYPO3 is
+		distributed under the GPL license, however Kasper has expressed certain
+		aims for the system which we ask you to respect (see typo3.com for more
+		information).	
+	</description>
+
+	<icon path="images/typo3logo_mini.png"/>
+
+	<screenshot path="images/app_screenshot.png">
+		<description>
+			The introduction package provides a broad spectrum of the most common features of a TYPO3 installation.
+		</description>
+	</screenshot>
+
+	<license must-accept="true">
+		<text>
+			<name>GPLv2</name>
+			<file>htdocs/GPL.txt</file>
+		</text>
+	</license>
+
+	<configuration-script-language>php</configuration-script-language>
+
+	<upgradable-from version="4.0.0" release="1"/>
+
+<!--
+	<changelog>
+		<version version="4.0.0" release="1">
+			<entry></entry>
+		</version>
+	</changelog>
+-->
+
+	<entry-points>
+		<entry>
+			<path>/</path>
+			<label>Site</label>
+		</entry>
+		<entry>
+			<path>/typo3/index.php</path>
+			<label>Administrative interface</label>
+		</entry>
+	</entry-points>
+
+	<installed-size>63751307</installed-size>
+
+	<categories>
+			<category>Web/Content management</category>
+	</categories>
+
+	<languages>
+		<language>en</language>
+	</languages>
+
+	<settings>
+		<group>
+			<name>Administrator's preferences</name>
+			<setting id="admin_name" type="string" default-value="admin">
+				<name>Administrator's login</name>
+			</setting>
+			<setting id="admin_password" type="password" >
+				<name>Password</name>
+			</setting>
+			<setting id="title" type="string" min-length="1">
+				<name>Site name</name>
+			</setting>			
+		</group>
+	</settings>
+	<requirements xmlns:php="http://apstandard.com/ns/1/php" xmlns:db="http://apstandard.com/ns/1/db">
+		<php:version min="5.2.0"/>
+		<php:extension>mysql</php:extension>
+		<php:extension>mbstring</php:extension>
+		<php:extension>curl</php:extension>
+		<php:extension>json</php:extension>
+		<php:extension>gd</php:extension>
+		<php:extension>filter</php:extension>
+		<php:extension>pcre</php:extension>
+		<php:extension>xml</php:extension>
+		<php:extension>standard</php:extension>
+		<php:extension>session</php:extension>
+		<php:memory-limit>67108864</php:memory-limit>
+
+		<php:safe-mode>false</php:safe-mode>
+
+		<db:db>
+			<db:id>main</db:id>
+			<db:default-name>typo3</db:default-name>
+			<db:can-use-tables-prefix>false</db:can-use-tables-prefix>
+			<db:server-type>mysql</db:server-type>
+			<db:server-min-version>4.1.0</db:server-min-version>
+		</db:db>
+	</requirements>
+
+	<mapping url="/" path="htdocs" xmlns:php="http://apstandard.com/ns/1/php">
+		<php:handler>
+			<php:extension>php</php:extension>
+		</php:handler>
+		
+		<mapping url="typo3conf">
+			<php:permissions writable="true"/>
+		</mapping>
+		<mapping url="fileadmin">
+			<php:permissions writable="true"/>
+		</mapping>
+		<mapping url="typo3temp">
+			<php:permissions writable="true"/>
+		</mapping>
+		<mapping url="uploads">
+			<php:permissions writable="true"/>
+		</mapping>
+		<mapping url="typo3/ext">
+			<php:permissions writable="true"/>
+		</mapping>
+	</mapping>
+</application>

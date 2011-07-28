@@ -1,9 +1,0 @@
-[submodule "Distributions/Base"]
-	path = Distributions/Base
-	url = git://git.typo3.org/TYPO3v4/Distributions/Base.git
-[submodule "Distributions/Blank"]
-	path = Distributions/Blank
-	url = git://git.typo3.org/TYPO3v4/Distributions/Blank.git
-[submodule "Distributions/Introduction"]
-	path = Distributions/Introduction
-	url = git://git.typo3.org/TYPO3v4/Distributions/Introduction.git

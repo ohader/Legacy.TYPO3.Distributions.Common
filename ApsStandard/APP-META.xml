@@ -1,0 +1,170 @@
+<application xmlns="http://apstandard.com/ns/1" version="1.2">
+  <!-- Full URL specifying where the application is to be installed
+   -->
+  <!--
+    BASE_URL_SCHEME
+    BASE_URL_HOST
+    BASE_URL_PORT
+    BASE_URL_PATH
+  -->
+	<id>http://typo3.org/</id>
+	<name>TYPO3</name>
+	<version>###T3VERSION###</version>
+	<release>1</release>
+	<homepage>http://typo3.org/</homepage>
+	<vendor>
+	    <name>TYPO3</name>
+	    <homepage>http://typo3.com/About.1231.0.html</homepage>
+	    <icon path="images/typo3logo_mini.png"/>
+	</vendor>
+	<packager>
+		<name>TYPO3</name>
+		<homepage>http://typo3.org/</homepage>
+		<uri>http://typo3.org/</uri>
+	</packager>
+	<presentation>
+		<summary>Free and Open Source Enterprise Content Management System</summary>
+		<description>
+			TYPO3 is developed by the Danish programmer Kasper Skaarhoej. It is the
+			most advanced GPL Content Management Framework available, and competes
+			very successfully with commercial products costing US $50.000. TYPO3 is
+			distributed under the GPL license, however Kasper has expressed certain
+			aims for the system which we ask you to respect (see typo3.com for more
+			information).	
+        </description>
+		<icon path="images/typo3logo_mini.png"/>
+		<screenshot path="images/app_screenshot.png">
+			<description>
+				The introduction package provides a broad spectrum of the most common
+				features of a TYPO3 installation.
+			</description>
+		</screenshot>
+		<changelog>
+			<version version="###T3VERSION###" release="1">
+				<entry>Packaged as APS 1.1</entry>
+			</version>
+		</changelog>
+		<categories>
+			<category>Web/Content management</category>
+		</categories>
+		<languages>
+			<language>en</language>
+		</languages>
+	</presentation>
+
+<!--	
+	<patch match="/application/version = '5.0.0'
+          or /application/version = '5.1.0a'"/>
+-->
+	<service id="instance">
+		<license must-accept="true">
+			<free/>
+			<text>
+				<name>GPLv2</name>
+				<file>htdocs/GPL.txt</file>
+			</text>
+		</license>
+		<presentation>
+			<name>TYPO3</name>
+			<summary>TYPO3 CMS</summary>
+			<infolinks>
+				<link class="support" href="http://typo3.org/">typo3.org</link>
+				<link class="official" href="http://typo3.com/">typo3.com</link>
+			</infolinks>
+			<entry-points>
+				<entry dst="/typo3/" method="POST">
+					<label>TYPO3 Backend</label>
+					<variable name="username" value-of-setting="admin_name"/>
+					<variable name="password" value-of-setting="admin_password"/>
+				</entry>
+			</entry-points>
+		</presentation>
+
+		<settings>
+			<group>
+				<name>Administrator's Account</name>
+				<setting id="admin_name" type="string" 
+                      default-value="admin" min-length="1" 
+                      max-length="32" 
+                      regex="^[a-zA-Z][0-9a-zA-Z_\-]*"
+					class="login">
+					<name>Administrator's Login</name>
+					<error-message>Please make sure the text
+                            you entered starts with a letter and 
+                            continues with either numbers, letters,
+                            underscores or hyphens.
+                           </error-message>
+				</setting>
+				<setting id="admin_password" type="password" 
+                      class="password">
+					<name>Administrator's Password</name>
+				</setting>
+			</group>
+			<group class="web">
+				<setting id="title" type="string" 
+                      default-value="New TYPO3 Website" class="title">
+					<name>System Name</name>
+					<description>This name will be displayed 
+                           in the browser title bar when users visit the website
+					</description>
+				</setting>
+			</group>
+		</settings>
+		<requirements xmlns:php="http://apstandard.com/ns/1/php" xmlns:db="http://apstandard.com/ns/1/db" xmlns:apache="http://apstandard.com/ns/1/apache">
+			<php:version min="5.2.0"/>
+			<php:file-uploads>true</php:file-uploads>
+			<php:register-globals>false</php:register-globals>
+			<php:memory-limit>67108864</php:memory-limit>
+			<php:function>exec</php:function>
+			<php:allow-url-fopen>true</php:allow-url-fopen>
+			<!-- <php:safe-mode>false</php:safe-mode> -->
+
+			<php:extension>filter</php:extension>
+			<php:extension>gd</php:extension>
+			<php:extension>json</php:extension>
+			<php:extension>mysql</php:extension>
+			<php:extension>pcre</php:extension>
+			<php:extension>session</php:extension>
+			<php:extension>SPL</php:extension>
+			<php:extension>standard</php:extension>
+			<php:extension>xml</php:extension>
+
+              <!-- 
+              DB_main_TYPE
+              DB_main_NAME
+              DB_main_LOGIN
+              DB_main_PASSWORD
+              DB_main_HOST
+              DB_main_PORT
+              DB_main_VERSION
+              DB_main_PREFIX
+              -->
+			<db:db>
+				<db:id>main</db:id>
+				<db:default-name>typo3</db:default-name>
+				<db:can-use-tables-prefix>false</db:can-use-tables-prefix>
+				<db:server-type>mysql</db:server-type>
+				<db:server-min-version>5.1.0</db:server-min-version>
+			</db:db>
+		</requirements>
+		<provision>
+			<url-mapping>
+				<default-prefix>typo3</default-prefix>
+				<installed-size>62820030</installed-size>
+
+				<mapping url="/" path="htdocs" xmlns:php="http://apstandard.com/ns/1/php">
+					<php:handler><php:extension>php</php:extension></php:handler>
+					<mapping url="typo3conf"><php:permissions writable="true"/></mapping>
+					<mapping url="typo3temp"><php:permissions writable="true"/></mapping>
+					<mapping url="fileadmin"><php:permissions writable="true"/></mapping>
+					<mapping url="uploads"><php:permissions writable="true"/></mapping>
+				</mapping>
+			</url-mapping>
+
+			<configuration-script name="configure">
+				<script-language>php</script-language>
+				<structured-output></structured-output>
+			</configuration-script>
+		</provision>
+	</service>
+</application>
