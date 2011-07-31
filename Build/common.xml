@@ -121,15 +121,31 @@
 		<delete dir="${project.workDirectory}Temporary.git/" quiet="true" />
 
 		<fail unless="repository-export.gitName" message="Property $repository-dump.gitName is required." />
+		<fail unless="repository-export.gitNameDefault" message="Property $repository-dump.gitName is required." />
 		<fail unless="repository-export.gitRepository" message="Propery $repository-dump.gitRepository is required." />
 		<fail unless="repository-export.directory" message="Propery $repository-dump.directory is required." />
 
-		<exec logoutput="true" checkreturn="true"
-			command="git clone --recursive ${repository-export.gitRepository} ${project.workDirectory}Temporary.git/" />
+		<exec logoutput="false" checkreturn="false"
+			outputProperty="repository-export.gitNameFound"
+			command="git ls-remote --heads ${repository-export.gitRepository} ${repository-export.gitName}" />
 
+		<if>
+			<not><contains string="${repository-export.gitNameFound}" substring="${repository-export.gitName}"/></not>
+			<then>
+				<echo msg="Branch ${repository-export.gitName} was not found, using ${repository-export.gitNameDefault} instead" />
+				<property name="repository-export.gitNameAvailable" value="${repository-export.gitNameDefault}" />
+			</then>
+			<else>
+				<property name="repository-export.gitNameAvailable" value="${repository-export.gitName}" />
+			</else>
+		</if>
+
+		<exec logoutput="true" checkreturn="true"
+			command="git clone -b ${repository-export.gitNameAvailable} --recursive ${repository-export.gitRepository} ${project.workDirectory}Temporary.git/" />
+		
 		<phingcall target="repository-dump">
 			<property name="repository-dump.gitDirectory" value="${project.workDirectory}Temporary.git/" />
-			<property name="repository-dump.gitName" value="${repository-export.gitName}" />
+			<property name="repository-dump.gitName" value="${repository-export.gitNameAvailable}" />
 			<property name="repository-dump.directory" value="${repository-export.directory}" />
 		</phingcall>
 	</target>

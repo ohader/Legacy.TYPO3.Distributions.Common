@@ -44,7 +44,8 @@
 		<mkdir dir="${introduction.workDirectory}" />
 
 		<phingcall target="repository-export">
-			<property name="repository-export.gitName" value="master" />
+			<property name="repository-export.gitName" value="${common.info.branchName}" />
+			<property name="repository-export.gitNameDefault" value="master" />
 			<property name="repository-export.gitRepository" value="${introduction.resourcesRepository}" />
 			<property name="repository-export.directory" value="${introduction.resourcesDirectory}" />
 		</phingcall>
