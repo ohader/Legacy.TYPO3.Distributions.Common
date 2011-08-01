@@ -20,6 +20,7 @@
 -->
 <project name="TYPO3v4Common" basedir="." default="common">
 	<property name="common.all" value="false" />
+	<property name="common.skipClone" value="false" />
 
 	<taskdef name="typo3convertversion" classname="Tasks.Typo3ConvertVersionTask" />
 	<taskdef name="typo3convertwhitespaces" classname="Tasks.Typo3ConvertWhitespacesTask" />
@@ -193,17 +194,11 @@
 	<target name="repository-clone">
 		<available file="${project.localRepositoryDirectory}.git" type="dir" property="repository-clone.exists" />
 		<if>
-			<not><isset property="repository-clone.exists" /></not>
+			<and>
+				<isset property="repository-clone.exists" />
+				<istrue value="${common.skipClone}" />
+			</and>
 			<then>
-				<delete dir="${project.localRepositoryDirectory}" quiet="true" />
-				<mkdir dir="${project.localRepositoryDirectory}" />
-
-				<exec logoutput="true" checkreturn="true"
-					command="git clone --recursive ${git.remoteRepository} ${project.localRepositoryDirectory}" />
-
-				<phingcall target="repository-initialize" />
-			</then>
-			<else>
 				<exec logoutput="true" checkreturn="true"
 					dir="${project.localRepositoryDirectory}"
 					command="git reset --hard origin" />
@@ -225,9 +220,15 @@
 				<exec logoutput="true" checkreturn="true"
 					dir="${project.localRepositoryDirectory}"
 					command="git submodule --quiet update --init" />
-				<!--
-				<gitpull repository="${git.remoteRepository}" gitPath="${project.gitPath}" />
-				-->
+				</then>
+			<else>
+				<delete dir="${project.localRepositoryDirectory}" quiet="true" />
+				<mkdir dir="${project.localRepositoryDirectory}" />
+
+				<exec logoutput="true" checkreturn="true"
+					command="git clone --recursive ${git.remoteRepository} ${project.localRepositoryDirectory}" />
+
+				<phingcall target="repository-initialize" />
 			</else>
 		</if>
 	</target>
