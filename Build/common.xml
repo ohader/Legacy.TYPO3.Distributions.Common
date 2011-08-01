@@ -51,12 +51,27 @@
 	</tstamp>
 
 	<target name="common">
-		<input propertyName="common.type" defaultValue="snapshot"
-			validArgs="snapshot,regular,alpha,beta,rc" message="Type of the release" />
-		<input propertyName="common.major" defaultValue="4.6"
-			validArgs="4.1,4.2,4.3,4.4,4.5,4.6" message="Major version of the release" />
-		<input propertyName="common.publish" defaultValue="n"
-			validArgs="y,n" message="Publish (Git repository, SourceForge)" />
+		<if>
+			<not><isset property="common.type" /></not>
+			<then>
+				<input propertyName="common.type" defaultValue="snapshot"
+					validArgs="snapshot,regular,alpha,beta,rc" message="Type of the release" />
+			</then>
+		</if>
+		<if>
+			<not><isset property="common.major" /></not>
+			<then>
+				<input propertyName="common.major" defaultValue="4.6"
+					validArgs="4.1,4.2,4.3,4.4,4.5,4.6" message="Major version of the release" />
+			</then>
+		</if>
+		<if>
+			<not><isset property="common.publish" /></not>
+			<then>
+				<input propertyName="common.publish" defaultValue="n"
+					validArgs="y,n" message="Publish (Git repository, SourceForge)" />
+			</then>
+		</if>
 
 		<phingcall target="repository-clone" />
 
