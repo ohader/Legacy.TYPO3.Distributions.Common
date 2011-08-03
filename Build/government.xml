@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ * This script belongs to the TYPO3 v4 build system.                      *
+ *                                                                        *
+ * It is free software; you can redistribute it and/or modify it under    *
+ * the terms of the GNU Lesser General Public License as published by the *
+ * Free Software Foundation, either version 3 of the License, or (at your *
+ * option) any later version.                                             *
+ *                                                                        *
+ * This script is distributed in the hope that it will be useful, but     *
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHAN-    *
+ * TABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser       *
+ * General Public License for more details.                               *
+ *                                                                        *
+ * You should have received a copy of the GNU Lesser General Public       *
+ * License along with the script.                                         *
+ * If not, see http://www.gnu.org/licenses/lgpl.html                      *
+ *                                                                        *
+ * The TYPO3 project - inspiring people to share!                         *
+-->
+<project name="TYPO3v4GovernmentPackage" basedir="." default="government">
+	<if>
+		<not><isset property="common.isLoaded" /></not>
+		<then><import file="${project.basedir}/Build/common.xml" /></then>
+	</if>
+
+	<property name="government.resourcesRepository" value="git://git.typo3.org/TYPO3v4/Distributions/Government.git" />
+	<property name="government.resourcesDirectory" value="${project.workDirectory}Resources/Government/" />
+	<property name="government.workDirectory" value="${project.workDirectory}Targets/Government/" />
+	<property name="government.apsStandardDirectory" value="${project.basedir}/ApsStandard/" />
+
+	<target name="government" depends="common,project-initialize,government-execute">
+		<phingcall target="project-md5" />
+		<phingcall target="publish-sourceforge">
+			<property name="publish-sourceforge.directory" value="TYPO3 ${government.versionName}" />
+		</phingcall>
+	</target>
+
+	<target name="government-execute">
+		<delete dir="${government.resourcesDirectory}" quiet="true" />
+		<mkdir dir="${government.resourcesDirectory}" />
+
+		<delete dir="${government.workDirectory}" quiet="true" />
+		<mkdir dir="${government.workDirectory}" />
+
+		<phingcall target="repository-export">
+			<property name="repository-export.gitName" value="${common.info.branchName}" />
+			<property name="repository-export.gitNameDefault" value="master" />
+			<property name="repository-export.gitRepository" value="${government.resourcesRepository}" />
+			<property name="repository-export.directory" value="${government.resourcesDirectory}" />
+		</phingcall>
+
+		<if>
+			<equals arg1="${common.type}" arg2="snapshot" />
+			<then>
+				<property name="government.versionName" value="${common.major}-snapshot-${common.date}" />
+				<property name="government.gitName" value="${common.info.branchName}" />
+			</then>
+			<!-- if all distributions are called and thus a new base version was created -->
+			<elseif>
+				<istrue value="${common.all}" />
+				<then>
+					<fail unless="common.info.nextTag" message="There is no release tag available." />
+				<property name="government.versionName" value="${common.info.nextVersion}" />
+				<property name="government.gitName" value="${common.info.nextTag}" />
+				</then>
+			</elseif>
+			<else>
+				<fail unless="common.info.currentTag" message="There is no release tag available." />
+				<property name="government.versionName" value="${common.info.currentVersion}" />
+				<property name="government.gitName" value="${common.info.currentTag}" />
+			</else>
+		</if>
+
+		<property name="government.sourceName" value="typo3_src-${government.versionName}" />
+		<property name="government.packageName" value="governmentpackage-${government.versionName}" />
+		<property name="government.workAppDirectory" value="${government.workDirectory}${government.packageName}.app/" />
+		<property name="government.workBaseDirectory" value="${government.workDirectory}${government.packageName}/" />
+		<property name="government.workSourceDirectory" value="${government.workDirectory}${government.sourceName}/" />
+		<property name="government.prefixDirectory" value="${government.packageName}/" />
+
+		<phingcall target="repository-dump">
+			<property name="repository-dump.gitName" value="${government.gitName}" />
+			<property name="repository-dump.directory" value="${government.workSourceDirectory}" />
+		</phingcall>
+		
+		<phingcall target="government-package-linked" />
+		<phingcall target="government-package-raw" />
+		<!-- <phingcall target="government-package-app" /> -->
+	</target>
+
+	<target name="government-resources">
+		<fail unless="government-resources.directory" message="You must set the $government-resources.directory for this target" />
+
+		<copy todir="${government-resources.directory}">
+			<fileset dir="${government.resourcesDirectory}" />
+		</copy>
+	</target>
+
+	<target name="government-package-linked">
+		<delete dir="${government.workBaseDirectory}" quiet="true" />
+		<mkdir dir="${government.workBaseDirectory}" />
+
+		<phingcall target="government-resources">
+			<property name="government-resources.directory" value="${government.workBaseDirectory}" />
+		</phingcall>
+
+		<copy todir="${government.workBaseDirectory}${government.sourceName}/">
+			<fileset dir="${government.workSourceDirectory}" />
+		</copy>
+
+		<symlink target="${government.sourceName}/" link="${government.workBaseDirectory}typo3_src" />
+		<symlink target="typo3_src/index.php" link="${government.workBaseDirectory}index.php" />
+		<symlink target="typo3_src/t3lib" link="${government.workBaseDirectory}t3lib" />
+		<symlink target="typo3_src/typo3" link="${government.workBaseDirectory}typo3" />
+
+		<phingcall target="project-permissions">
+			<property name="project-permissions.directory" value="${government.workBaseDirectory}" />
+		</phingcall>
+
+		<delete file="${project.targetsDirectory}${government.packageName}.tar.gz" quiet="true"/>
+		<echo message="Creating ${government.packageName}.tar.gz" />
+		<exec logoutput="true" checkreturn="true"
+			command="cd ${government.workDirectory}; tar -czf ${project.targetsDirectory}${government.packageName}.tar.gz ${government.prefixDirectory}" />
+	</target>
+
+	<target name="government-package-raw">
+		<delete dir="${government.workBaseDirectory}" quiet="true" />
+		<mkdir dir="${government.workBaseDirectory}" />
+
+		<copy todir="${government.workBaseDirectory}">
+			<fileset dir="${government.workSourceDirectory}" />
+		</copy>
+
+		<phingcall target="government-resources">
+			<property name="government-resources.directory" value="${government.workBaseDirectory}" />
+		</phingcall>
+
+		<phingcall target="project-permissions">
+			<property name="project-permissions.directory" value="${government.workBaseDirectory}" />
+		</phingcall>
+
+		<delete file="${project.targetsDirectory}${government.packageName}.zip" quiet="true"/>
+		<echo message="Creating ${government.packageName}.zip" />
+		<exec logoutput="true" checkreturn="true"
+			command="cd ${government.workDirectory}; zip -rq9 ${project.targetsDirectory}${government.packageName}.zip ${government.prefixDirectory}" />
+	</target>
+
+	<target name="government-package-app">
+		<!-- TODO needs to be changed/moved -->
+
+		<delete dir="${government.workAppDirectory}" quiet="true" />
+		<mkdir dir="${government.workAppDirectory}" />
+		<mkdir dir="${government.workAppDirectory}htdocs/" />
+
+		<copy todir="${government.workAppDirectory}">
+			<fileset dir="${government.apsStandardDirectory}" />
+			<filterchain>
+				<replaceregexp>
+					<regexp pattern="###T3VERSION###" replace="${government.versionName}" />
+				</replaceregexp>
+			</filterchain>
+		</copy>
+
+		<copy todir="${government.workAppDirectory}htdocs/">
+			<fileset dir="${government.workSourceDirectory}" />
+		</copy>
+
+		<phingcall target="government-resources">
+			<property name="government-resources.directory" value="${government.workAppDirectory}htdocs/" />
+		</phingcall>
+
+		<phingcall target="project-permissions">
+			<property name="project-permissions.directory" value="${government.workAppDirectory}htdocs/" />
+		</phingcall>
+
+		<typo3applist file="${government.workAppDirectory}APP-LIST.xml">
+			<fileset dir="${government.workAppDirectory}">
+				<include name="APP-META.xml" />
+			</fileset>
+			<fileset dir="${government.workAppDirectory}htdocs/" />
+			<fileset dir="${government.workAppDirectory}scripts/" />
+			<fileset dir="${government.workAppDirectory}images/" />
+			<fileset dir="${government.workAppDirectory}test/" />
+		</typo3applist>
+
+		<delete file="${project.targetsDirectory}${government.packageName}.app.zip" quiet="true"/>
+
+		<echo message="Creating ${government.packageName}.app.zip" />
+		<exec logoutput="true" checkreturn="true"
+			command="zip -rq9 ${project.targetsDirectory}${government.packageName}.app.zip ${government.workAppDirectory}" />
+	</target>
+</project>

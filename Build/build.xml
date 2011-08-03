@@ -28,6 +28,7 @@
 	<import file="${project.basedir}/Build/blank.xml" />
 	<import file="${project.basedir}/Build/dummy.xml" />
 	<import file="${project.basedir}/Build/introduction.xml" />
+	<import file="${project.basedir}/Build/government.xml" />
 
 	<target name="build" depends="common,project-initialize">
 		<if>
@@ -64,6 +65,9 @@
 			<isfalse value="${common.info.isOutdatedBranch}" />
 			<then>
 				<phingcall target="introduction-execute" />
+				<!--
+					<phingcall target="government-execute" />
+				-->
 			</then>
 		</if>
 
