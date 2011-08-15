@@ -20,7 +20,7 @@
 -->
 <project name="TYPO3v4Submodules" basedir="." default="submodules">
 	<property name="common.taskPrefix" value="" override="true" />
-	<property name="submodules.start" value="TYPO3_4-2" />
+	<property name="submodules.start" value="TYPO3_4-3" />
 
 	<property name="submodules.workDirectory" value="${project.workDirectory}Submodules/" />
 	<property name="project.localRepositoryDirectory" value="${submodules.workDirectory}Core.git/" override="true" />
