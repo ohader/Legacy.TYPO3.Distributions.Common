@@ -419,9 +419,9 @@
 
 				<!-- the only way to create a folder via ssh, thanks FLOW3 -->
 				<typo3exec logoutput="true" retry="10" command="ssh -oBatchMode=yes shell.sourceforge.net create" />
-				<exec logoutput="true" checkreturn="true" command="ssh shell.sourceforge.net mkdir -p '${publish-sourceforge.fullPath}'" />
-				<exec logoutput="true" checkreturn="true" command="ssh shell.sourceforge.net chmod 0775 '${publish-sourceforge.fullPath}'" />
-				<exec logoutput="true" checkreturn="true" command="ssh shell.sourceforge.net shutdown" />
+				<typo3exec logoutput="true" retry="10" command="ssh shell.sourceforge.net mkdir -p '${publish-sourceforge.fullPath}'" />
+				<typo3exec logoutput="true" retry="10" command="ssh shell.sourceforge.net chmod 0775 '${publish-sourceforge.fullPath}'" />
+				<exec logoutput="true" checkreturn="false" command="ssh shell.sourceforge.net shutdown" />
 				<exec logoutput="true" checkreturn="true" command="scp ${project.targetsDirectory}* frs.sourceforge.net:'${publish-sourceforge.fullPath}/'" />
 			</then>
 		</if>
