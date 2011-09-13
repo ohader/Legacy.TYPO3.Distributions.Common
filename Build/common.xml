@@ -29,6 +29,7 @@
 	<taskdef name="typo3filehash" classname="Tasks.Typo3FileHashTask" />
 	<taskdef name="typo3applist" classname="Tasks.Typo3AppListTask" />
 	<taskdef name="typo3gitchangelog" classname="Tasks.Typo3GitChangelogTask" />
+	<taskdef name="typo3exec" classname="Tasks.Typo3ExecTask" />
 
 	<property name="git.remoteRepository" value="git://git.typo3.org/TYPO3v4/Core.git" />
 	<property name="git.commitHookCommand" value="scp -p -P 29418 review.typo3.org:hooks/commit-msg .git/hooks/" />
@@ -417,7 +418,7 @@
 				<echo message="Publishing to ${publish-sourceforge.fullPath}" />
 
 				<!-- the only way to create a folder via ssh, thanks FLOW3 -->
-				<exec logoutput="true" checkreturn="true" command="ssh shell.sourceforge.net create" />
+				<typo3exec logoutput="true" retry="10" command="ssh -oBatchMode=yes shell.sourceforge.net create" />
 				<exec logoutput="true" checkreturn="true" command="ssh shell.sourceforge.net mkdir -p '${publish-sourceforge.fullPath}'" />
 				<exec logoutput="true" checkreturn="true" command="ssh shell.sourceforge.net chmod 0775 '${publish-sourceforge.fullPath}'" />
 				<exec logoutput="true" checkreturn="true" command="ssh shell.sourceforge.net shutdown" />
