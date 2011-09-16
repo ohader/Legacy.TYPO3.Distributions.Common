@@ -63,7 +63,7 @@
 			<not><isset property="common.major" /></not>
 			<then>
 				<input propertyName="common.major" defaultValue="4.6"
-					validArgs="4.1,4.2,4.3,4.4,4.5,4.6" message="Major version of the release" />
+					validArgs="4.1,4.2,4.3,4.4,4.5,4.6,4.7" message="Major version of the release" />
 			</then>
 		</if>
 		<if>
@@ -78,12 +78,17 @@
 
 		<typo3convertversion value="${common.major}" type="branch" property="common.branch" />
 
-		<typo3gitinfo
-			branch="${common.branch}"
-			type="${common.type}"
-			property="common.info"
-			gitPath="${project.gitPath}"
-			repository="${project.localRepositoryDirectory}" />
+		<if>
+			<not><isset property="common.info.branchName" /></not>
+			<then>
+				<typo3gitinfo
+					branch="${common.branch}"
+					type="${common.type}"
+					property="common.info"
+					gitPath="${project.gitPath}"
+					repository="${project.localRepositoryDirectory}" />
+			</then>
+		</if>
 
 		<echo message="nextVersion: ${common.info.nextVersion}" />
 		<echo message="nextTag: ${common.info.nextTag}" />
