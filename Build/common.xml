@@ -222,13 +222,28 @@
 			<then>
 				<exec logoutput="true" checkreturn="true"
 					dir="${project.localRepositoryDirectory}"
-					command="git reset --hard origin" />
-				<exec logoutput="true" checkreturn="true"
-					dir="${project.localRepositoryDirectory}"
 					command="git clean -df" />
-				<exec logoutput="true" checkreturn="true"
-					dir="${project.localRepositoryDirectory}"
-					command="git checkout master" />
+
+				<if>
+					<isset property="common.info.branchName" />
+					<then>
+						<exec logoutput="true" checkreturn="true"
+							dir="${project.localRepositoryDirectory}"
+							command="git checkout ${common.info.branchName}" />
+						<exec logoutput="true" checkreturn="true"
+							dir="${project.localRepositoryDirectory}"
+							command="git reset --hard origin/${common.info.branchName}" />
+					</then>
+					<else>
+						<exec logoutput="true" checkreturn="true"
+							dir="${project.localRepositoryDirectory}"
+							command="git checkout master" />
+						<exec logoutput="true" checkreturn="true"
+							dir="${project.localRepositoryDirectory}"
+							command="git reset --hard origin/master" />
+					</else>
+				</if>
+
 				<exec logoutput="true" checkreturn="true"
 					dir="${project.localRepositoryDirectory}"
 					command="git clean -df" />
@@ -246,8 +261,17 @@
 				<delete dir="${project.localRepositoryDirectory}" quiet="true" />
 				<mkdir dir="${project.localRepositoryDirectory}" />
 
-				<exec logoutput="true" checkreturn="true"
-					command="git clone --recursive ${git.remoteRepository} ${project.localRepositoryDirectory}" />
+				<if>
+					<isset property="common.info.branchName" />
+					<then>
+						<exec logoutput="true" checkreturn="true"
+							command="git clone --recursive -b ${common.info.branchName} ${git.remoteRepository} ${project.localRepositoryDirectory}" />
+					</then>
+					<else>
+						<exec logoutput="true" checkreturn="true"
+							command="git clone --recursive ${git.remoteRepository} ${project.localRepositoryDirectory}" />
+					</else>
+				</if>
 
 				<phingcall target="repository-initialize" />
 			</else>
@@ -383,13 +407,21 @@
 			<property name="repository-select.branch" value="${repository-typo3-changelog.branch}" />
 		</phingcall>
 
-		<exec logoutput="false" checkreturn="false"
-			dir="${project.localRepositoryDirectory}"
-			outputProperty="repository-typo3-changelog.raw"
-			command="git log refs/tags/${common.info.lastReference}..HEAD --submodule --pretty=format:hash:%h%x09date:%cd%x09subject:%s%x09author:%an%x09body:%b--%x09COMMIT --date=short" />
-		<typo3gitchangelog file="${repository-typo3-changelog.file}" property="repository-typo3-changelog.raw"
-			format="{{date}}  {{hash}}  {{body.resolves,8}}  {{subject}} ({{author}})"
-			fieldDelimiter="&#09;" commitDelimiter="--&#09;COMMIT" />
+		<if>
+			<isset property="common.info.lastReference" />
+			<then>
+				<exec logoutput="false" checkreturn="false"
+					dir="${project.localRepositoryDirectory}"
+					outputProperty="repository-typo3-changelog.raw"
+					command="git log refs/tags/${common.info.lastReference}..HEAD --submodule --pretty=format:hash:%h%x09date:%cd%x09subject:%s%x09author:%an%x09body:%b--%x09COMMIT --date=short" />
+				<typo3gitchangelog file="${repository-typo3-changelog.file}" property="repository-typo3-changelog.raw"
+					format="{{date}}  {{hash}}  {{body.resolves,8}}  {{subject}} ({{author}})"
+					fieldDelimiter="&#09;" commitDelimiter="--&#09;COMMIT" />
+			</then>
+			<else>
+				<echo message="Since no lastReference is given, no ChangeLog will be generated" />
+			</else>
+		</if>
 	</target>
 
 	<target name="typo3-version">
