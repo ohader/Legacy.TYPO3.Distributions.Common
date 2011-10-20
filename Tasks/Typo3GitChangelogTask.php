@@ -56,22 +56,37 @@ class Typo3GitChangelogTask extends Task {
 		$search = array();
 		$replace = array();
 
-		if (preg_match_all('/\{\{([^.}]+)(?:\.([^,}]+))?(?:,(\d+))?\}\}/', $format, $matches)) {
+		// Example: {{body.resolves|fixes;NoSpaces,14}}
+		// Note: Order is kept, so first remove spaces, then trim/pad
+		if (preg_match_all('/\{\{([^.}]+)(?:\.([^;}]+))?(?:;([^}]+))?\}\}/', $format, $matches)) {
 			foreach ($matches[0] as $index => $pattern) {
 				$name = $matches[1][$index];
 				$search[] = $pattern;
 
+				// Example: 'resolves' and $name is 'body' already
+				// will search for the "Resolves: #..." part in the commit body then
 				if (!empty($matches[2][$index])) {
 					$replaceValue = $this->getCommitValue($matches[2][$index], $commit[$name]);
 				} else {
 					$replaceValue = $commit[$name];
 				}
 
+				// Modifiers in general, comma separated
 				if (!empty($matches[3][$index])) {
-					if (strlen($replaceValue) > $matches[3][$index]) {
-						$replaceValue = substr($replaceValue, 0, $matches[3][$index]);
-					} else {
-						$replaceValue = str_pad($replaceValue, $matches[3][$index], ' ');
+					$modifiers = explode(',', $matches[3][$index]);
+
+					foreach ($modifiers as $modifier) {
+						// Max length:
+						if (preg_match('/^\d+$/', $modifier)) {
+							if (strlen($replaceValue) > $modifier) {
+								$replaceValue = substr($replaceValue, 0, $modifier);
+							} else {
+								$replaceValue = str_pad($replaceValue, $modifier, ' ');
+							}
+						// Remove spaces:
+						} elseif ($modifier === 'NoSpaces') {
+							$replaceValue = preg_replace('/\s+/', '', $replaceValue);
+						}
 					}
 				}
 
@@ -86,11 +101,18 @@ class Typo3GitChangelogTask extends Task {
 
 	private function getCommitValue($key, $data) {
 		$value = '';
-		$keyPattern = preg_quote($key, '/');
+		// Regular expressions are allowed here and will automatically wrapped in brackets:
+		$keyPattern = '(' . preg_replace('/[^a-z0-9|]/', '', $key) . ')';
 		$matches = array();
 
-		if (preg_match('/^' . $keyPattern . ':(.+)$/im', $data, $matches)) {
-			$value = trim($matches[1]);
+		if (preg_match_all('/^' . $keyPattern . ':(.+)$/im', $data, $matches)) {
+			$values = array();
+
+			foreach ($matches[2] as $index => $pattern) {
+				$values[] = trim($pattern);
+			}
+
+			$value = implode(',', $values);
 		}
 
 		return $value;

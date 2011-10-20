@@ -415,7 +415,7 @@
 					outputProperty="repository-typo3-changelog.raw"
 					command="git log refs/tags/${common.info.lastReference}..HEAD --submodule --pretty=format:hash:%h%x09date:%cd%x09subject:%s%x09author:%an%x09body:%b--%x09COMMIT --date=short" />
 				<typo3gitchangelog file="${repository-typo3-changelog.file}" property="repository-typo3-changelog.raw"
-					format="{{date}}  {{hash}}  {{body.resolves,8}}  {{subject}} ({{author}})"
+					format="{{date}}  {{hash}}  {{body.resolves|fixes;NoSpaces,14}}  {{subject}} ({{author}})"
 					fieldDelimiter="&#09;" commitDelimiter="--&#09;COMMIT" />
 			</then>
 			<else>
