@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ * This script belongs to the TYPO3 v4 build system.                      *
+ *                                                                        *
+ * It is free software; you can redistribute it and/or modify it under    *
+ * the terms of the GNU Lesser General Public License as published by the *
+ * Free Software Foundation, either version 3 of the License, or (at your *
+ * option) any later version.                                             *
+ *                                                                        *
+ * This script is distributed in the hope that it will be useful, but     *
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHAN-    *
+ * TABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser       *
+ * General Public License for more details.                               *
+ *                                                                        *
+ * You should have received a copy of the GNU Lesser General Public       *
+ * License along with the script.                                         *
+ * If not, see http://www.gnu.org/licenses/lgpl.html                      *
+ *                                                                        *
+ * The TYPO3 project - inspiring people to share!                         *
+-->
+<project name="TYPO3v4Security" basedir="." default="security">
+	<property name="common.taskPrefix" value="" override="true" />
+	<property name="security.start" value="TYPO3_4-3" />
+
+	<import file="${project.basedir}/Build/common.xml" />
+
+	<property name="security.workDirectory" value="${project.workDirectory}Security/" />
+	<property name="security.bulletinMessage" value="Bulletin-Id: TYPO3-CORE-${common.year}-" />
+	<property name="security.remoteRepository" value="ssh://review.typo3.org:29418/Teams/Security/Typo3v4-Core.git" />
+	<property name="project.localRepositoryDirectory" value="${security.workDirectory}Core.git/" override="true" />
+
+	<target name="security">
+		<if>
+			<not><isset property="security.bulletinNo" /></not>
+			<then>
+				<input propertyName="security.bulletinNo" defaultValue="001"
+					validArgs="001,002,003,004,005,006,007,008,009" message="Bulletin number (TYPO3-CORE-${common.year}-xxx)" />
+			</then>
+		</if>
+
+		<delete dir="${security.workDirectory}" quiet="true" />
+		<mkdir dir="${security.workDirectory}" />
+
+		<exec logoutput="false" checkreturn="false"
+			outputProperty="security.branchList"
+			command="git ls-remote --heads ${git.remoteRepository}" />
+		<typo3branchlist input="${security.branchList}"
+				start="${security.start}"
+				property="security.branchList" />
+
+		<phingcall target="security-repository" />
+
+		<foreach target="security-action"
+			list="${security.branchList}"
+			param="security-action.branch" />
+	</target>
+
+	<target name="security-repository">
+		<delete dir="${project.localRepositoryDirectory}" quiet="true" />
+		<mkdir dir="${project.localRepositoryDirectory}" />
+
+		<!--
+			origin will point to the public TYPO3 Core (upstream)
+			security will point to the private TYPO3 Core-Security
+		-->
+
+		<exec logoutput="true" checkreturn="true"
+			command="git clone --recursive ${git.remoteRepository} ${project.localRepositoryDirectory}" />
+		<exec logoutput="true" checkreturn="true"
+			dir="${project.localRepositoryDirectory}"
+			command="git remote add security ${security.remoteRepository}" />
+		<exec logoutput="true" checkreturn="true"
+			dir="${project.localRepositoryDirectory}"
+			command="git fetch --all" />
+
+		<phingcall target="repository-initialize" />
+	</target>
+
+	<target name="security-action">
+		<fail unless="security-action.branch" message="Property $security-action.branch is required." />
+
+		<echo message="Working on branch ${security-action.branch}" />
+
+		<exec logoutput="true" checkreturn="true"
+			dir="${project.localRepositoryDirectory}"
+			command="git clean -df" />
+		<exec logoutput="true" checkreturn="true"
+			dir="${project.localRepositoryDirectory}"
+			command="git checkout -B ${security-action.branch} origin/${security-action.branch}" />
+		<exec logoutput="true" checkreturn="true"
+			dir="${project.localRepositoryDirectory}"
+			command="git reset --hard origin/${security-action.branch}" />
+		<exec logoutput="true" checkreturn="true"
+			dir="${project.localRepositoryDirectory}"
+			command="git submodule update --init" />
+
+		<exec logoutput="false" checkreturn="true"
+			dir="${project.localRepositoryDirectory}"
+			outputProperty="security-action.cherries"
+			command="git cherry origin/${security-action.branch} security/${security-action.branch} | grep '^+ ' | sed 's/^+ //'" />
+
+		<typo3list property="security-action.cherries" outputProperty="security-action.cherries" />
+
+		<if>
+			<not><equals arg1="${security-action.cherries}" arg2="" /></not>
+			<then>
+				<echo message="Updates available" />
+				<foreach target="security-cherry-pick"
+					list="${security-action.cherries}"
+					param="security-cherry-pick.commit" />
+
+				<!--
+				<exec logoutput="true" checkreturn="true"
+					dir="${project.localRepositoryDirectory}"
+					command="git push origin HEAD:refs/for/${security-action.branch}" />
+				-->
+
+				<exec logoutput="false" checkreturn="true"
+					dir="${project.localRepositoryDirectory}"
+					outputProperty="security-action.approve"
+					command="git log --pretty=format:%H origin/${security-action.branch}..HEAD" />
+
+				<typo3list property="security-action.approve" outputProperty="security-action.approve" />
+
+				<!--
+				<phingcall target="repository-typo3-approve">
+					<property name="repository-typo3-approve.commitHash" value="${security-action.approve}" />
+				</phingcall>
+				-->
+			</then>
+			<else>
+				<echo message="No updates required" />
+			</else>
+		</if>
+	</target>
+
+	<target name="security-cherry-pick">
+		<exec logoutput="false" checkreturn="true"
+			dir="${project.localRepositoryDirectory}"
+			command="git cherry-pick ${security-cherry-pick.commit}" />
+		<exec logoutput="true" checkreturn="true"
+			dir="${project.localRepositoryDirectory}"
+			command="git log -1 --pretty='format:%s%n%n%b${security.bulletinMessage}${security.bulletinNo}%nCherry: ${security-cherry-pick.commit}' | sed '/^Change-Id:/d' > ${project.localRepositoryMessage}" />
+		<exec logoutput="true" checkreturn="true"
+			dir="${project.localRepositoryDirectory}"
+			command="git commit --amend --file=${project.localRepositoryMessage}" />
+	</target>
+</project>
