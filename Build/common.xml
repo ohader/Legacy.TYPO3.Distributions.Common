@@ -30,6 +30,7 @@
 	<taskdef name="typo3applist" classname="Tasks.Typo3AppListTask" />
 	<taskdef name="typo3gitchangelog" classname="Tasks.Typo3GitChangelogTask" />
 	<taskdef name="typo3exec" classname="Tasks.Typo3ExecTask" />
+	<taskdef name="typo3list" classname="Tasks.Typo3ListTask" />
 
 	<property name="git.remoteRepository" value="git://git.typo3.org/TYPO3v4/Core.git" />
 	<property name="git.commitHookCommand" value="scp -p -P 29418 review.typo3.org:hooks/commit-msg .git/hooks/" />
@@ -41,15 +42,15 @@
 	<property name="project.targetsDirectory" value="${project.basedir}/Targets/" />
 	<property name="project.workDirectory" value="${project.basedir}/Work/" />
 	<property name="project.localRepositoryDirectory" value="${project.workDirectory}Core.git/" />
+	<property name="project.localRepositoryMessage" value="${project.workDirectory}Core.git/.git/COMMIT_EDITMSG" />
 	<property name="project.resourcesDirectory" value="${project.basedir}/Resources/" />
 	<property name="project.versionFile" value="t3lib/config_default.php" />
 
 	<exec logoutput="false" checkreturn="true" command="git --exec-path" outputProperty="project.gitPath" />
 	<property name="project.gitPath" value="${project.gitPath}/git" override="true" />
 
-	<tstamp>
-		<format property="common.date" pattern="%Y%m%d" />
-	</tstamp>
+	<tstamp><format property="common.date" pattern="%Y%m%d" /></tstamp>
+	<tstamp><format property="common.year" pattern="%Y" /></tstamp>
 
 	<target name="common">
 		<if>
@@ -313,11 +314,22 @@
 	<target name="repository-select">
 		<fail unless="repository-select.branch" message="Property $repository-select.branch is required." />
 		<property name="repository-select.gitDirectory" value="${project.localRepositoryDirectory}" />
+		<property name="repository-select.resetHard" value="false" />
 
 		<gitcheckout
 			gitPath="${project.gitPath}"
 			repository="${repository-select.gitDirectory}"
 			branchname="${repository-select.branch}" />
+
+		<if>
+			<istrue value="${repository-select.resetHard}" />
+			<then>
+				<exec logoutput="true" checkreturn="true"
+					dir="${repository-select.gitDirectory}"
+					command="git reset --hard origin/${repository-select.branch}" />
+			</then>
+		</if>
+
 		<exec logoutput="true" checkreturn="true"
 			dir="${repository-select.gitDirectory}"
 			command="git submodule update --init" />
@@ -375,11 +387,16 @@
 	</target>
 
 	<target name="repository-typo3-approve">
-		<!-- also submit the patch through gerrit after the push -->
-		<exec logoutput="false" checkreturn="false"
-			dir="${project.localRepositoryDirectory}"
-			outputProperty="repository-typo3-approve.commitHash"
-			command="git log -1 --pretty=format:%H" />
+		<if>
+			<not><isset property="repository-typo3-approve.commitHash" /></not>
+			<then>
+				<exec logoutput="false" checkreturn="false"
+					dir="${project.localRepositoryDirectory}"
+					outputProperty="repository-typo3-approve.commitHash"
+					command="git log -1 --pretty=format:%H" />
+			</then>
+		</if>
+		<!-- submit the patch through gerrit after the push -->
 		<exec logoutput="true" checkreturn="true"
 			dir="${project.localRepositoryDirectory}"
 			command="${git.submitApprovalCommand} ${repository-typo3-approve.commitHash}" />
