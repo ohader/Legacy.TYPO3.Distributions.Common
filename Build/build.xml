@@ -48,14 +48,22 @@
 		<phingcall target="dummy-execute" />
 		<phingcall target="blank-execute" />
 
-		<!-- build Introduction if the branch is not outdated -->
+		<!-- build Introduction if the branch is not outdated or if it's 4.5 LTS -->
 		<if>
-			<isfalse value="${common.info.isOutdatedBranch}" />
+			<or>
+				<isfalse value="${common.info.isOutdatedBranch}" />
+				<equals arg1="${common.major}" arg2="4.5" />
+			</or>
 			<then>
 				<phingcall target="introduction-execute" />
-				<!--
-					<phingcall target="government-execute" />
-				-->
+			</then>
+		</if>
+
+		<!-- build Government if the branch is 4.7 (todo: or above) -->
+		<if>
+			<equals arg1="${common.major}" arg2="4.7" />
+			<then>
+				<phingcall target="government-execute" />
 			</then>
 		</if>
 
