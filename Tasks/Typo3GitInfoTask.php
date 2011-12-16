@@ -7,6 +7,7 @@ class Typo3GitInfoTask extends GitBaseTask {
 	const TYPE_RC = 'rc';
 	const TAG_Prefix = 'TYPO3_';
 	const TAG_Delimiter = '-';
+	const BRANCH_Pattern = 'TYPO3_\d+-\d+';
 	const VERSION_Pattern = '\d+-\d+';
 	const VERSION_Delimiter = '.';
 
@@ -74,7 +75,7 @@ class Typo3GitInfoTask extends GitBaseTask {
 		$client = $this->getGitClient(false, $this->getRepository());
 		$command = $client->getCommand('ls-remote');
 		$command->setOption('heads', TRUE);
-		$result = preg_replace('#^[^/]*refs/heads/(' . self::TAG_Prefix . '.+)$#m', '$1', $command->execute());
+		$result = preg_replace('#^[^/]*refs/heads/(' . self::BRANCH_Pattern . ')$#m', '$1', $command->execute());
 		$branches = $this->explode($result);
 		sort($branches);
 		return $branches;
