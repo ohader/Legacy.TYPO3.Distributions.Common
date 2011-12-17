@@ -73,7 +73,7 @@
 		-->
 
 		<exec logoutput="true" checkreturn="true"
-			command="git clone --recursive ${git.remoteRepository} ${project.localRepositoryDirectory}" />
+			command="git clone --recursive ${git.remoteRepository} &quot;${project.localRepositoryDirectory}&quot;" />
 		<exec logoutput="true" checkreturn="true"
 			dir="${project.localRepositoryDirectory}"
 			command="git remote add security ${security.remoteRepository}" />

@@ -126,7 +126,7 @@
 		<delete file="${project.targetsDirectory}${blank.packageName}.tar.gz" quiet="true"/>
 		<echo message="Creating ${blank.packageName}.tar.gz" />
 		<exec logoutput="true" checkreturn="true"
-			command="cd ${blank.workDirectory}; tar -czf ${project.targetsDirectory}${blank.packageName}.tar.gz ${blank.prefixDirectory}" />
+			command="cd &quot;${blank.workDirectory}&quot;; tar -czf &quot;${project.targetsDirectory}${blank.packageName}.tar.gz&quot; &quot;${blank.prefixDirectory}&quot;" />
 	</target>
 
 	<target name="blank-package-raw">
@@ -148,6 +148,6 @@
 		<delete file="${project.targetsDirectory}${blank.packageName}.zip" quiet="true"/>
 		<echo message="Creating ${blank.packageName}.zip" />
 		<exec logoutput="true" checkreturn="true"
-			command="cd ${blank.workDirectory}; zip -rq9 ${project.targetsDirectory}${blank.packageName}.zip ${blank.prefixDirectory}" />
+			command="cd &quot;${blank.workDirectory}&quot;; zip -rq9 &quot;${project.targetsDirectory}${blank.packageName}.zip&quot; &quot;${blank.prefixDirectory}&quot;" />
 	</target>
 </project>

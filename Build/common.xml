@@ -155,7 +155,7 @@
 		</if>
 
 		<exec logoutput="true" checkreturn="true"
-			command="git clone -b ${repository-export.gitNameAvailable} --recursive ${repository-export.gitRepository} ${project.workDirectory}Temporary.git/" />
+			command="git clone -b ${repository-export.gitNameAvailable} --recursive ${repository-export.gitRepository} &quot;${project.workDirectory}Temporary.git/&quot;" />
 		
 		<phingcall target="repository-dump">
 			<property name="repository-dump.gitDirectory" value="${project.workDirectory}Temporary.git/" />
@@ -179,10 +179,10 @@
 
 		<exec logoutput="true" checkreturn="true"
 			dir="${repository-dump.gitDirectory}"
-			command="git checkout-index -a --prefix=${repository-dump.directory}" />
+			command="git checkout-index -a --prefix=&quot;${repository-dump.directory}&quot;" />
 		<exec logoutput="true" checkreturn="true"
 			dir="${repository-dump.gitDirectory}"
-			command="git submodule foreach 'git checkout-index -a --prefix=${repository-dump.directory}$path/'" />
+			command="git submodule foreach 'git checkout-index -a --prefix=&quot;${repository-dump.directory}$path/&quot;'" />
 
 		<delete includeemptydirs="true">
 			<fileset dir="${repository-dump.directory}" defaultexcludes="false">
@@ -257,11 +257,11 @@
 					<isset property="common.info.branchName" />
 					<then>
 						<exec logoutput="true" checkreturn="true"
-							command="git clone --recursive -b ${common.info.branchName} ${git.remoteRepository} ${project.localRepositoryDirectory}" />
+							command="git clone --recursive -b ${common.info.branchName} ${git.remoteRepository} &quot;${project.localRepositoryDirectory}&quot;" />
 					</then>
 					<else>
 						<exec logoutput="true" checkreturn="true"
-							command="git clone --recursive ${git.remoteRepository} ${project.localRepositoryDirectory}" />
+							command="git clone --recursive ${git.remoteRepository} &quot;${project.localRepositoryDirectory}&quot;" />
 					</else>
 				</if>
 
@@ -467,7 +467,7 @@
 				<typo3exec logoutput="true" retry="5" command="ssh shell.sourceforge.net mkdir -p '${publish-sourceforge.fullPath}'" />
 				<typo3exec logoutput="true" retry="5" command="ssh shell.sourceforge.net chmod 0775 '${publish-sourceforge.fullPath}'" />
 				<typo3exec logoutput="true" retry="5" command="ssh shell.sourceforge.net shutdown" />
-				<typo3exec logoutput="true" retry="5" command="scp ${project.targetsDirectory}* frs.sourceforge.net:'${publish-sourceforge.fullPath}/'" />
+				<typo3exec logoutput="true" retry="5" command="scp '${project.targetsDirectory}*' frs.sourceforge.net:'${publish-sourceforge.fullPath}/'" />
 			</then>
 		</if>
 	</target>

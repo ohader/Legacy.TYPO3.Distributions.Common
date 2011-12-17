@@ -184,11 +184,11 @@
 		<delete file="${project.targetsDirectory}${base.packageName}.tar.gz" quiet="true"/>
 		<echo message="Creating ${base.packageName}.tar.gz" />
 		<exec logoutput="true" checkreturn="true"
-			command="cd ${base.workDirectory}; tar -czf ${project.targetsDirectory}${base.packageName}.tar.gz ${base.prefixDirectory}" />
+			command="cd &quot;${base.workDirectory}&quot;; tar -czf &quot;${project.targetsDirectory}${base.packageName}.tar.gz&quot; &quot;${base.prefixDirectory}&quot;" />
 
 		<delete file="${project.targetsDirectory}${base.packageName}.zip" quiet="true"/>
 		<echo message="Creating ${base.packageName}.zip" />
 		<exec logoutput="true" checkreturn="true"
-			command="cd ${base.workDirectory}; zip -rq9 ${project.targetsDirectory}${base.packageName}.zip ${base.prefixDirectory}" />
+			command="cd &quot;${base.workDirectory}&quot;; zip -rq9 &quot;${project.targetsDirectory}${base.packageName}.zip&quot; &quot;${base.prefixDirectory}&quot;" />
 	</target>	
 </project>

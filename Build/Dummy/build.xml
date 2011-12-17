@@ -126,7 +126,7 @@
 		<delete file="${project.targetsDirectory}${dummy.packageName}.tar.gz" quiet="true"/>
 		<echo message="Creating ${dummy.packageName}.tar.gz" />
 		<exec logoutput="true" checkreturn="true"
-			command="cd ${dummy.workDirectory}; tar -czf ${project.targetsDirectory}${dummy.packageName}.tar.gz ${dummy.prefixDirectory}" />
+			command="cd &quot;${dummy.workDirectory}&quot;; tar -czf &quot;${project.targetsDirectory}${dummy.packageName}.tar.gz&quot; &quot;${dummy.prefixDirectory}&quot;" />
 	</target>
 
 	<target name="dummy-package-small">
@@ -144,7 +144,7 @@
 		<delete file="${project.targetsDirectory}${dummy.packageName}.zip" quiet="true"/>
 		<echo message="Creating ${dummy.packageName}.zip" />
 		<exec logoutput="true" checkreturn="true"
-			command="cd ${dummy.workDirectory}; zip -rq9 ${project.targetsDirectory}${dummy.packageName}.zip ${dummy.prefixDirectory}" />
+			command="cd &quot;${dummy.workDirectory}&quot;; zip -rq9 &quot;${project.targetsDirectory}${dummy.packageName}.zip&quot; &quot;${dummy.prefixDirectory}&quot;" />
 	</target>
 
 	<target name="dummy-package-raw">
@@ -166,6 +166,6 @@
 		<delete file="${project.targetsDirectory}${dummy.sourcePackageName}.zip" quiet="true"/>
 		<echo message="Creating ${dummy.sourcePackageName}.zip" />
 		<exec logoutput="true" checkreturn="true"
-			command="cd ${dummy.workDirectory}; zip -rq9 ${project.targetsDirectory}${dummy.sourcePackageName}.zip ${dummy.sourcePrefixDirectory}" />
+			command="cd &quot;${dummy.workDirectory}&quot;; zip -rq9 &quot;${project.targetsDirectory}${dummy.sourcePackageName}.zip&quot; &quot;${dummy.sourcePrefixDirectory}&quot;" />
 	</target>
 </project>

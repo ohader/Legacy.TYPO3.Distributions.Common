@@ -60,7 +60,7 @@
 		<mkdir dir="${project.localRepositoryDirectory}" />
 
 		<exec logoutput="true" checkreturn="true"
-			command="git clone --branch ${submodules-action.branch} --recursive ${git.remoteRepository} ${project.localRepositoryDirectory}" />
+			command="git clone --branch ${submodules-action.branch} --recursive ${git.remoteRepository} &quot;${project.localRepositoryDirectory}&quot;" />
 
 		<phingcall target="repository-initialize" />
 

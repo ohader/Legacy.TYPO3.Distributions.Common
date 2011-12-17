@@ -129,7 +129,7 @@
 		<delete file="${project.targetsDirectory}${government.packageName}.tar.gz" quiet="true"/>
 		<echo message="Creating ${government.packageName}.tar.gz" />
 		<exec logoutput="true" checkreturn="true"
-			command="cd ${government.workDirectory}; tar -czf ${project.targetsDirectory}${government.packageName}.tar.gz ${government.prefixDirectory}" />
+			command="cd &quot;${government.workDirectory}&quot;; tar -czf &quot;${project.targetsDirectory}${government.packageName}.tar.gz&quot; &quot;${government.prefixDirectory}&quot;" />
 	</target>
 
 	<target name="government-package-raw">
@@ -151,7 +151,7 @@
 		<delete file="${project.targetsDirectory}${government.packageName}.zip" quiet="true"/>
 		<echo message="Creating ${government.packageName}.zip" />
 		<exec logoutput="true" checkreturn="true"
-			command="cd ${government.workDirectory}; zip -rq9 ${project.targetsDirectory}${government.packageName}.zip ${government.prefixDirectory}" />
+			command="cd &quot;${government.workDirectory}&quot;; zip -rq9 &quot;${project.targetsDirectory}${government.packageName}.zip&quot; &quot;${government.prefixDirectory}&quot;" />
 	</target>
 
 	<target name="government-package-app">
@@ -196,6 +196,6 @@
 
 		<echo message="Creating ${government.packageName}.app.zip" />
 		<exec logoutput="true" checkreturn="true"
-			command="zip -rq9 ${project.targetsDirectory}${government.packageName}.app.zip ${government.workAppDirectory}" />
+			command="zip -rq9 &quot;${project.targetsDirectory}${government.packageName}.app.zip&quot; &quot;${government.workAppDirectory}&quot;" />
 	</target>
 </project>

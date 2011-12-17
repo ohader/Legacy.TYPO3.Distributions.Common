@@ -129,7 +129,7 @@
 		<delete file="${project.targetsDirectory}${introduction.packageName}.tar.gz" quiet="true"/>
 		<echo message="Creating ${introduction.packageName}.tar.gz" />
 		<exec logoutput="true" checkreturn="true"
-			command="cd ${introduction.workDirectory}; tar -czf ${project.targetsDirectory}${introduction.packageName}.tar.gz ${introduction.prefixDirectory}" />
+			command="cd &quot;${introduction.workDirectory}&quot;; tar -czf &quot;${project.targetsDirectory}${introduction.packageName}.tar.gz&quot; &quot;${introduction.prefixDirectory}&quot;" />
 	</target>
 
 	<target name="introduction-package-raw">
@@ -151,7 +151,7 @@
 		<delete file="${project.targetsDirectory}${introduction.packageName}.zip" quiet="true"/>
 		<echo message="Creating ${introduction.packageName}.zip" />
 		<exec logoutput="true" checkreturn="true"
-			command="cd ${introduction.workDirectory}; zip -rq9 ${project.targetsDirectory}${introduction.packageName}.zip ${introduction.prefixDirectory}" />
+			command="cd &quot;${introduction.workDirectory}&quot;; zip -rq9 &quot;${project.targetsDirectory}${introduction.packageName}.zip&quot; &quot;${introduction.prefixDirectory}&quot;" />
 	</target>
 
 	<target name="introduction-package-app">
@@ -196,6 +196,6 @@
 
 		<echo message="Creating ${introduction.packageName}.app.zip" />
 		<exec logoutput="true" checkreturn="true"
-			command="zip -rq9 ${project.targetsDirectory}${introduction.packageName}.app.zip ${introduction.workAppDirectory}" />
+			command="zip -rq9 &quot;${project.targetsDirectory}${introduction.packageName}.app.zip&quot; &quot;${introduction.workAppDirectory}&quot;" />
 	</target>
 </project>
