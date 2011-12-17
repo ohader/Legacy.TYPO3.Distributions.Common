@@ -19,16 +19,19 @@
  * The TYPO3 project - inspiring people to share!                         *
 -->
 <project name="TYPO3v4Build" basedir="." default="build">
+	<php function="dirname" returnProperty="build.basedir"><param value="${phing.file}" /></php>
+	<property name="common.basedir" value="${build.basedir}" />
+
 	<property name="common.all" value="true" override="true" />
 
-	<import file="${project.basedir}/Build/common.xml" />
+	<import file="${common.basedir}/common.xml" />
 	<property name="common.isLoaded" value="true" override="true" />
 
-	<import file="${project.basedir}/Build/base.xml" />
-	<import file="${project.basedir}/Build/blank.xml" />
-	<import file="${project.basedir}/Build/dummy.xml" />
-	<import file="${project.basedir}/Build/introduction.xml" />
-	<import file="${project.basedir}/Build/government.xml" />
+	<import file="${build.basedir}/Base/build.xml" />
+	<import file="${build.basedir}/Blank/build.xml" />
+	<import file="${build.basedir}/Dummy/build.xml" />
+	<import file="${build.basedir}/Introduction/build.xml" />
+	<import file="${build.basedir}/Government/build.xml" />
 
 	<target name="build" depends="common,project-initialize">
 		<if>

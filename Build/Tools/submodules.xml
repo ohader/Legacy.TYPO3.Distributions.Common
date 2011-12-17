@@ -19,13 +19,21 @@
  * The TYPO3 project - inspiring people to share!                         *
 -->
 <project name="TYPO3v4Submodules" basedir="." default="submodules">
-	<property name="common.taskPrefix" value="" override="true" />
+	<if>
+		<not><isset property="build.basedir" /></not>
+		<then><php function="dirname" returnProperty="build.basedir"><param value="${phing.file}" /></php></then>
+	</if>
+	<if>
+		<not><isset property="common.basedir" /></not>
+		<then><resolvepath propertyName="common.basedir" file="${build.basedir}/.." /></then>
+	</if>
+
 	<property name="submodules.start" value="TYPO3_4-3" />
 
 	<property name="submodules.workDirectory" value="${project.workDirectory}Submodules/" />
 	<property name="project.localRepositoryDirectory" value="${submodules.workDirectory}Core.git/" override="true" />
 
-	<import file="${project.basedir}/Build/common.xml" />
+	<import file="${build.basedir}/../common.xml" />
 
 	<target name="submodules">
 		<delete dir="${submodules.workDirectory}" quiet="true" />

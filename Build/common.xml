@@ -22,15 +22,7 @@
 	<property name="common.all" value="false" />
 	<property name="common.skipClone" value="false" />
 
-	<taskdef name="typo3convertversion" classname="Tasks.Typo3ConvertVersionTask" />
-	<taskdef name="typo3convertwhitespaces" classname="Tasks.Typo3ConvertWhitespacesTask" />
-	<taskdef name="typo3gitinfo" classname="Tasks.Typo3GitInfoTask" />
-	<taskdef name="typo3branchlist" classname="Tasks.Typo3BranchListTask" />
-	<taskdef name="typo3filehash" classname="Tasks.Typo3FileHashTask" />
-	<taskdef name="typo3applist" classname="Tasks.Typo3AppListTask" />
-	<taskdef name="typo3gitchangelog" classname="Tasks.Typo3GitChangelogTask" />
-	<taskdef name="typo3exec" classname="Tasks.Typo3ExecTask" />
-	<taskdef name="typo3list" classname="Tasks.Typo3ListTask" />
+	<taskdef file="${common.basedir}/tasks.properties" classpath="${common.basedir}" />
 
 	<property name="git.remoteRepository" value="git://git.typo3.org/TYPO3v4/Core.git" />
 	<property name="git.commitHookCommand" value="scp -p -P 29418 review.typo3.org:hooks/commit-msg .git/hooks/" />
@@ -39,11 +31,10 @@
 	<property name="git.pushTopic" value="/RELEASE" />
 	<property name="git.author" value="TYPO3 v4 Release Team &lt;typo3v4@typo3.org&gt;" />
 
-	<property name="project.targetsDirectory" value="${project.basedir}/Targets/" />
-	<property name="project.workDirectory" value="${project.basedir}/Work/" />
+	<property name="project.targetsDirectory" value="${build.basedir}/Targets/" />
+	<property name="project.workDirectory" value="${build.basedir}/Work/" />
 	<property name="project.localRepositoryDirectory" value="${project.workDirectory}Core.git/" />
 	<property name="project.localRepositoryMessage" value="${project.workDirectory}Core.git/.git/COMMIT_EDITMSG" />
-	<property name="project.resourcesDirectory" value="${project.basedir}/Resources/" />
 	<property name="project.versionFile" value="t3lib/config_default.php" />
 
 	<exec logoutput="false" checkreturn="true" command="git --exec-path" outputProperty="project.gitPath" />

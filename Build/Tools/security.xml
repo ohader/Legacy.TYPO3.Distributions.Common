@@ -19,10 +19,18 @@
  * The TYPO3 project - inspiring people to share!                         *
 -->
 <project name="TYPO3v4Security" basedir="." default="security">
-	<property name="common.taskPrefix" value="" override="true" />
+	<if>
+		<not><isset property="build.basedir" /></not>
+		<then><php function="dirname" returnProperty="build.basedir"><param value="${phing.file}" /></php></then>
+	</if>
+	<if>
+		<not><isset property="common.basedir" /></not>
+		<then><resolvepath propertyName="common.basedir" file="${build.basedir}/.." /></then>
+	</if>
+
 	<property name="security.start" value="TYPO3_4-3" />
 
-	<import file="${project.basedir}/Build/common.xml" />
+	<import file="${build.basedir}/../common.xml" />
 
 	<property name="security.workDirectory" value="${project.workDirectory}Security/" />
 	<property name="security.bulletinMessage" value="Bulletin-Id: TYPO3-CORE-${common.year}-" />

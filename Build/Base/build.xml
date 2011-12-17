@@ -20,8 +20,16 @@
 -->
 <project name="TYPO3v4Base" basedir="." default="base">
 	<if>
+		<not><isset property="build.basedir" /></not>
+		<then><php function="dirname" returnProperty="build.basedir"><param value="${phing.file}" /></php></then>
+	</if>
+	<if>
+		<not><isset property="common.basedir" /></not>
+		<then><resolvepath propertyName="common.basedir" file="${build.basedir}/.." /></then>
+	</if>
+	<if>
 		<not><isset property="common.isLoaded" /></not>
-		<then><import file="${project.basedir}/Build/common.xml" /></then>
+		<then><import file="${build.basedir}/../common.xml" /></then>
 	</if>
 
 	<property name="base.resourcesRepository" value="git://git.typo3.org/TYPO3v4/Distributions/Base.git" />
