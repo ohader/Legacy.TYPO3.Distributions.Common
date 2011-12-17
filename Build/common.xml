@@ -288,7 +288,7 @@
 			command="${git.commitHookCommand}" />
 		<exec logoutput="true" checkreturn="true"
 			dir="${project.localRepositoryDirectory}"
-			command="git submodule --quiet foreach 'cp $toplevel/.git/hooks/commit-msg .git/hooks/'" />
+			command="git submodule --quiet foreach 'cp &quot;$toplevel/.git/hooks/commit-msg&quot; .git/hooks/'" />
 		<!-- Git configuration for submodules -->
 		<exec logoutput="true" checkreturn="true"
 			dir="${project.localRepositoryDirectory}"
