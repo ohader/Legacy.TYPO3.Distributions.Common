@@ -25,7 +25,7 @@
 	<taskdef file="${common.basedir}/tasks.properties" classpath="${common.basedir}" />
 
 	<property name="git.remoteRepository" value="git://git.typo3.org/TYPO3v4/Core.git" />
-	<property name="git.commitHookCommand" value="scp -p -P 29418 review.typo3.org:hooks/commit-msg .git/hooks/" />
+	<property name="git.commitHookCommand" value="wget -q --no-check-certificate -O .git/hooks/commit-msg https://review.typo3.org/tools/hooks/commit-msg" />
 	<property name="git.submitApprovalCommand" value="ssh -p 29418 review.typo3.org gerrit approve --verified=+2 --code-review=+2 --project TYPO3v4/Core --message 'Auto-approved' --submit" />
 	<property name="git.pushUrl" value="ssh://review.typo3.org/TYPO3v4/Core.git" />
 	<property name="git.pushTopic" value="/RELEASE" />
@@ -288,7 +288,7 @@
 			command="${git.commitHookCommand}" />
 		<exec logoutput="true" checkreturn="true"
 			dir="${project.localRepositoryDirectory}"
-			command="git submodule --quiet foreach '${git.commitHookCommand}'" />
+			command="git submodule --quiet foreach 'cp $toplevel/.git/hooks/commit-msg .git/hooks/'" />
 		<!-- Git configuration for submodules -->
 		<exec logoutput="true" checkreturn="true"
 			dir="${project.localRepositoryDirectory}"
