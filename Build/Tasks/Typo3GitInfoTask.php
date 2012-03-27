@@ -51,9 +51,13 @@ class Typo3GitInfoTask extends GitBaseTask {
 			throw new BuildException('Parameter property is required.');
 		}
 
+		$tags = $this->getGitTags();
+		$branches = $this->getGitBranches();
+
 		$info = $this->getInfo(
-			$this->getGitTags(),
-			$this->getGitBranches()
+			$tags,
+			$branches,
+			$this->getStableBranches($tags, $branches)
 		);
 
 		foreach ($info as $key => $value) {
@@ -79,6 +83,23 @@ class Typo3GitInfoTask extends GitBaseTask {
 		$branches = $this->explode($result);
 		sort($branches);
 		return $branches;
+	}
+
+	/**
+	 * @param array $tags
+	 * @param array $branches
+	 * @return array
+	 */
+	private function getStableBranches(array $tags, array $branches) {
+		$stableBranches = array();
+
+		foreach ($branches as $branch) {
+			if (in_array($branch . '-0', $tags)) {
+				$stableBranches[] = $branch;
+			}
+		}
+
+		return $stableBranches;
 	}
 
 	private function explode($string) {
@@ -172,7 +193,7 @@ class Typo3GitInfoTask extends GitBaseTask {
 		return $tag;
 	}
 
-	private function getInfo(array $tags, array $branches) {
+	private function getInfo(array $tags, array $branches, array $stableBranches) {
 		$info = array(
 			'currentVersion' => NULL,
 			'currentTag' => NULL,
@@ -235,9 +256,9 @@ class Typo3GitInfoTask extends GitBaseTask {
 			$info['successorVersion'] = $this->convertToVersion($this->branch);
 		}
 
-		if (in_array($this->branch, $branches)) {
+		if (in_array($this->branch, $stableBranches)) {
 			$info['branchName'] = $this->branch;
-			$info['isOutdatedBranch'] = (array_search($this->branch, $branches) < count($branches) - 1);
+			$info['isOutdatedBranch'] = (array_search($this->branch, $stableBranches) < count($stableBranches) - 1);
 		}
 
 		$info['currentVersion'] = $this->convertToVersion($info['currentTag']);
