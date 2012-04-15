@@ -256,8 +256,11 @@ class Typo3GitInfoTask extends GitBaseTask {
 			$info['successorVersion'] = $this->convertToVersion($this->branch);
 		}
 
-		if (in_array($this->branch, $stableBranches)) {
+		if (in_array($this->branch, $branches)) {
 			$info['branchName'] = $this->branch;
+		}
+
+		if (in_array($this->branch, $stableBranches)) {
 			$info['isOutdatedBranch'] = (array_search($this->branch, $stableBranches) < count($stableBranches) - 1);
 		}
 
