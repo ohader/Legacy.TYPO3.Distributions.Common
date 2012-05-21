@@ -170,6 +170,19 @@ class Typo3GitInfoTask extends GitBaseTask {
 		return implode($delimiter, $parts);
 	}
 
+	private function decrementBranch(array $branches, $branch) {
+		$index = array_search($branch, $branches);
+		$last = count($branches) - 1;
+
+		if (is_integer($index) && $index > 0) {
+			return $branches[$index - 1];
+		} elseif ($last >= 0 && strcmp($branch, $branches[$last])) {
+			return $branches[$last];
+		} else {
+			return $this->decrement($branch);
+		}
+	}
+
 	private function convertToVersion($tag) {
 		$version = NULL;
 
@@ -210,7 +223,7 @@ class Typo3GitInfoTask extends GitBaseTask {
 		if ($this->type === self::TYPE_Regular) {
 			if (is_null($currentRegularTag)) {
 				$info['nextTag'] = $this->branch . self::TAG_Delimiter . '0';
-				$info['lastReference'] = $this->decrement($this->branch) . self::TAG_Delimiter . '0';
+				$info['lastReference'] = $this->decrementBranch($branches, $this->branch) . self::TAG_Delimiter . '0';
 			} else {
 				$info['currentTag'] = $currentRegularTag;
 				$info['nextTag'] = $this->increment($info['currentTag']);
@@ -222,7 +235,7 @@ class Typo3GitInfoTask extends GitBaseTask {
 			);
 		} elseif ($this->type === self::TYPE_Snapshot) {
 			if (is_null($currentRegularTag)) {
-				$info['lastReference'] = $this->decrement($this->branch) . self::TAG_Delimiter . '0';
+				$info['lastReference'] = $this->decrementBranch($branches, $this->branch) . self::TAG_Delimiter . '0';
 			} else {
 				$info['lastReference'] = $currentRegularTag;
 			}
@@ -246,7 +259,7 @@ class Typo3GitInfoTask extends GitBaseTask {
 				} elseif (is_null($currentRegularTag) === FALSE){
 					$info['lastReference'] = $currentRegularTag;
 				} else {
-					$info['lastReference'] = $this->decrement($this->branch) . self::TAG_Delimiter . '0';
+					$info['lastReference'] = $this->decrementBranch($branches, $this->branch) . self::TAG_Delimiter . '0';
 				}
 			} else {
 				$info['nextTag'] = $this->increment($info['currentTag'], $this->type);

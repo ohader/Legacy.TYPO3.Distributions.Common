@@ -35,7 +35,6 @@
 	<property name="project.workDirectory" value="${build.basedir}/Work/" />
 	<property name="project.localRepositoryDirectory" value="${project.workDirectory}Core.git/" />
 	<property name="project.localRepositoryMessage" value="${project.workDirectory}Core.git/.git/COMMIT_EDITMSG" />
-	<property name="project.versionFile" value="t3lib/config_default.php" />
 
 	<exec logoutput="false" checkreturn="true" command="git --exec-path" outputProperty="project.gitPath" />
 	<property name="project.gitPath" value="${project.gitPath}/git" override="true" />
@@ -54,8 +53,8 @@
 		<if>
 			<not><isset property="common.major" /></not>
 			<then>
-				<input propertyName="common.major" defaultValue="4.7"
-					validArgs="4.1,4.2,4.3,4.4,4.5,4.6,4.7" message="Major version of the release" />
+				<input propertyName="common.major" defaultValue="6.0"
+					validArgs="4.1,4.2,4.3,4.4,4.5,4.6,4.7,6.0" message="Major version of the release" />
 			</then>
 		</if>
 		<if>
@@ -436,16 +435,34 @@
 		<fail unless="typo3-version.set" message="Property $repository-typo3-version.set is required." />
 		<fail unless="typo3-version.directory" message="Property $repository-typo3-version.directory is required" />
 
-		<property name="typo3-version.filePath" value="${typo3-version.directory}${project.versionFile}" />
+		<!-- up to TYPO3 4.7 -->
+		<phingcall target="typo3-version-set">
+			<property name="typo3-version-set.versionFile" value="${typo3-version.directory}t3lib/config_default.php" />
+		</phingcall>
 
-		<move file="${typo3-version.filePath}" tofile="${typo3-version.filePath}.modified">
-			<filterchain>
-				<replaceregexp>
-					<regexp pattern="(\$TYPO_VERSION = )\'[^\']+" replace="$1'${typo3-version.set}" />
-				</replaceregexp>
-			</filterchain>
-		</move>
-		<move file="${typo3-version.filePath}.modified" tofile="${typo3-version.filePath}" />
+		<!-- since TYPO3 6.0 -->
+		<phingcall target="typo3-version-set">
+			<property name="typo3-version-set.versionFile" value="${typo3-version.directory}typo3/Bootstrap.php" />
+		</phingcall>
+	</target>
+
+	<target name="typo3-version-set">
+		<fail unless="typo3-version-set.versionFile" message="Property $typo3-version-set.versionFile is required." />
+
+		<if>
+			<available file="${typo3-version-set.versionFile}" />
+			<then>
+				<move file="${typo3-version-set.versionFile}" tofile="${typo3-version-set.versionFile}.modified">
+					<filterchain>
+						<replaceregexp>
+							<regexp pattern="(\$TYPO_VERSION = )\'[^\']+" replace="$1'${typo3-version.set}" />
+							<regexp pattern="(\'TYPO3_version\',\s*)\'[^\']+" replace="$1'${typo3-version.set}" />
+						</replaceregexp>
+					</filterchain>
+				</move>
+				<move file="${typo3-version-set.versionFile}.modified" tofile="${typo3-version-set.versionFile}" />
+			</then>
+		</if>
 	</target>
 
 	<!--

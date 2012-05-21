@@ -28,7 +28,7 @@
 		<then><resolvepath propertyName="common.basedir" file="${build.basedir}/.." /></then>
 	</if>
 
-	<property name="submodules.start" value="TYPO3_4-3" />
+	<property name="submodules.start" value="TYPO3_4-5" />
 
 	<property name="submodules.workDirectory" value="${project.workDirectory}Submodules/" />
 	<property name="project.localRepositoryDirectory" value="${submodules.workDirectory}Core.git/" override="true" />
