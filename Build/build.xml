@@ -62,9 +62,9 @@
 			</then>
 		</if>
 
-		<!-- build Government if the branch is 4.7 (todo: or above) -->
+		<!-- build Government if the branch is not outdated -->
 		<if>
-			<equals arg1="${common.major}" arg2="4.7" />
+			<isfalse value="${common.info.isOutdatedBranch}" />
 			<then>
 				<phingcall target="government-execute" />
 			</then>
