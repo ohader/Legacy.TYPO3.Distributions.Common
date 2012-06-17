@@ -29,7 +29,7 @@
 	<property name="git.submitApprovalCommand" value="ssh -p 29418 review.typo3.org gerrit approve --verified=+2 --code-review=+2 --project TYPO3v4/Core --message 'Auto-approved' --submit" />
 	<property name="git.pushUrl" value="ssh://review.typo3.org/TYPO3v4/Core.git" />
 	<property name="git.pushTopic" value="/RELEASE" />
-	<property name="git.author" value="TYPO3 v4 Release Team &lt;typo3v4@typo3.org&gt;" />
+	<property name="git.author" value="TYPO3 Release Team &lt;typo3v4@typo3.org&gt;" />
 
 	<property name="project.targetsDirectory" value="${build.basedir}/Targets/" />
 	<property name="project.workDirectory" value="${build.basedir}/Work/" />
@@ -276,7 +276,7 @@
 			command="git config remote.origin.pushurl '${git.pushUrl}'" />
 		<exec logoutput="true" checkreturn="true"
 			dir="${project.localRepositoryDirectory}"
-			command="git config user.name 'TYPO3 v4 Release Team'" />
+			command="git config user.name 'TYPO3 Release Team'" />
 		<exec logoutput="true" checkreturn="true"
 			dir="${project.localRepositoryDirectory}"
 			command="git config user.email 'typo3v4@typo3.org'" />
@@ -294,7 +294,7 @@
 			command="git submodule --quiet foreach 'git config url.&quot;ssh://review.typo3.org:29418&quot;.pushInsteadOf git://git.typo3.org'" />
 		<exec logoutput="true" checkreturn="true"
 			dir="${project.localRepositoryDirectory}"
-			command="git submodule --quiet foreach 'git config user.name &quot;TYPO3 v4 Release Team&quot;'" />
+			command="git submodule --quiet foreach 'git config user.name &quot;TYPO3 Release Team&quot;'" />
 		<exec logoutput="true" checkreturn="true"
 			dir="${project.localRepositoryDirectory}"
 			command="git submodule --quiet foreach 'git config user.email &quot;typo3v4@typo3.org&quot;'" />
