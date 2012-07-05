@@ -199,6 +199,7 @@
 				<include name="*.webprj" />
 				<include name="*.orig" />
 				<include name="*~" />
+				<include name=".travis.yml" />
 			</fileset>
 		</delete>
 	</target>
