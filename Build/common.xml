@@ -443,7 +443,7 @@
 
 		<!-- since TYPO3 6.0 -->
 		<phingcall target="typo3-version-set">
-			<property name="typo3-version-set.versionFile" value="${typo3-version.directory}typo3/classes/Bootstrap/BaseSetup.php" />
+			<property name="typo3-version-set.versionFile" value="${typo3-version.directory}typo3/sysext/core/Classes/Core/SystemEnvironmentBuilder.php" />
 		</phingcall>
 	</target>
 
