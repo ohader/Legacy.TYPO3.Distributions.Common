@@ -136,6 +136,7 @@
 		<!-- push everything to the repository -->
 		<phingcall target="repository-typo3-push">
 			<property name="repository-typo3-push.branch" value="${common.info.branchName}" />
+			<property name="repository-typo3-push.refresh" value="true" />
 		</phingcall>
 
 		<!-- create an accordant tag which will be used to create the package -->

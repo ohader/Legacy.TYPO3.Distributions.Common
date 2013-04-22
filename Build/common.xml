@@ -364,7 +364,8 @@
 	</target>
 
 	<target name="repository-typo3-push">
-		<fail unless="repository-typo3-push.branch" message="Property $repository-typo3-push is required" />
+		<fail unless="repository-typo3-push.branch" message="Property $repository-typo3-push.branch is required" />
+		<property name="repository-typo3-push.refresh" value="false" />
 
 		<if>
 			<equals arg1="${common.publish}" arg2="y" />
@@ -373,6 +374,22 @@
 					dir="${project.localRepositoryDirectory}"
 					command="git push origin HEAD:refs/for/${repository-typo3-push.branch}${git.pushTopic}" />
 				<phingcall target="repository-typo3-approve" />
+
+				<if>
+					<istrue value="${repository-typo3-push.refresh}" />
+					<then>
+						<exec logoutput="false" checkreturn="true"
+							dir="${project.localRepositoryDirectory}"
+							outputProperty="repository-typo3-push.expected"
+							command="git log -1 --pretty=format:%s" />
+						<exec logoutput="false" checkreturn="true"
+							dir="${project.localRepositoryDirectory}"
+							command="git reset --hard origin/${repository-typo3-push.branch}" />
+						<typo3gitrefresh
+							repository="${project.localRepositoryDirectory}"
+							expected="${repository-typo3-push.expected}" />
+					</then>
+				</if>
 			</then>
 		</if>
 	</target>
