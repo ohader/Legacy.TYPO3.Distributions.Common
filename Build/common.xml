@@ -24,17 +24,17 @@
 
 	<taskdef file="${common.basedir}/tasks.properties" classpath="${common.basedir}" />
 
-	<property name="git.remoteRepository" value="git://git.typo3.org/TYPO3v4/Core.git" />
+	<property name="git.remoteRepository" value="git://git.typo3.org/Packages/TYPO3.CMS.git" />
 	<property name="git.commitHookCommand" value="wget -q --no-check-certificate -O .git/hooks/commit-msg https://review.typo3.org/tools/hooks/commit-msg; chmod 0755 .git/hooks/commit-msg" />
-	<property name="git.submitApprovalCommand" value="ssh -p 29418 review.typo3.org gerrit approve --verified=+2 --code-review=+2 --project TYPO3v4/Core --message 'Auto-approved' --submit" />
-	<property name="git.pushUrl" value="ssh://review.typo3.org/TYPO3v4/Core.git" />
+	<property name="git.submitApprovalCommand" value="ssh -p 29418 review.typo3.org gerrit approve --verified=+2 --code-review=+2 --project Packages/TYPO3.CMS --message 'Auto-approved' --submit" />
+	<property name="git.pushUrl" value="ssh://review.typo3.org/Packages/TYPO3.CMS.git" />
 	<property name="git.pushTopic" value="/RELEASE" />
 	<property name="git.author" value="TYPO3 Release Team &lt;typo3v4@typo3.org&gt;" />
 
 	<property name="project.targetsDirectory" value="${build.basedir}/Targets/" />
 	<property name="project.workDirectory" value="${build.basedir}/Work/" />
-	<property name="project.localRepositoryDirectory" value="${project.workDirectory}Core.git/" />
-	<property name="project.localRepositoryMessage" value="${project.workDirectory}Core.git/.git/COMMIT_EDITMSG" />
+	<property name="project.localRepositoryDirectory" value="${project.workDirectory}TYPO3.CMS.git/" />
+	<property name="project.localRepositoryMessage" value="${project.workDirectory}TYPO3.CMS.git/.git/COMMIT_EDITMSG" />
 
 	<exec logoutput="false" checkreturn="true" command="git --exec-path" outputProperty="project.gitPath" />
 	<property name="project.gitPath" value="${project.gitPath}/git" override="true" />
@@ -154,7 +154,7 @@
 		</if>
 
 		<exec logoutput="true" checkreturn="true"
-			command="git clone -b ${repository-export.gitNameAvailable} --recursive ${repository-export.gitRepository} &quot;${project.workDirectory}Temporary.git/&quot;" />
+			command="git clone -b ${repository-export.gitNameAvailable} ${repository-export.gitRepository} &quot;${project.workDirectory}Temporary.git/&quot;" />
 		
 		<phingcall target="repository-dump">
 			<property name="repository-dump.gitDirectory" value="${project.workDirectory}Temporary.git/" />
@@ -179,9 +179,6 @@
 		<exec logoutput="true" checkreturn="true"
 			dir="${repository-dump.gitDirectory}"
 			command="git checkout-index -a --prefix=&quot;${repository-dump.directory}&quot;" />
-		<exec logoutput="true" checkreturn="true"
-			dir="${repository-dump.gitDirectory}"
-			command="git submodule foreach 'git checkout-index -a --prefix=&quot;${repository-dump.directory}$path/&quot;'" />
 
 		<delete includeemptydirs="true">
 			<fileset dir="${repository-dump.directory}" defaultexcludes="false">
@@ -245,9 +242,6 @@
 				<exec logoutput="true" checkreturn="true"
 					dir="${project.localRepositoryDirectory}"
 					command="git fetch --tags" />
-				<exec logoutput="true" checkreturn="true"
-					dir="${project.localRepositoryDirectory}"
-					command="git submodule --quiet update --init" />
 				</then>
 			<else>
 				<delete dir="${project.localRepositoryDirectory}" quiet="true" />
@@ -257,11 +251,11 @@
 					<isset property="common.info.branchName" />
 					<then>
 						<exec logoutput="true" checkreturn="true"
-							command="git clone --recursive -b ${common.info.branchName} ${git.remoteRepository} &quot;${project.localRepositoryDirectory}&quot;" />
+							command="git clone -b ${common.info.branchName} ${git.remoteRepository} &quot;${project.localRepositoryDirectory}&quot;" />
 					</then>
 					<else>
 						<exec logoutput="true" checkreturn="true"
-							command="git clone --recursive ${git.remoteRepository} &quot;${project.localRepositoryDirectory}&quot;" />
+							command="git clone ${git.remoteRepository} &quot;${project.localRepositoryDirectory}&quot;" />
 					</else>
 				</if>
 
@@ -286,19 +280,6 @@
 		<exec logoutput="true" checkreturn="true"
 			dir="${project.localRepositoryDirectory}"
 			command="${git.commitHookCommand}" />
-		<exec logoutput="true" checkreturn="true"
-			dir="${project.localRepositoryDirectory}"
-			command="git submodule --quiet foreach 'cp &quot;$toplevel/.git/hooks/commit-msg&quot; $(git rev-parse --resolve-git-dir .git | tail -n 1)/hooks/'" />
-		<!-- Git configuration for submodules -->
-		<exec logoutput="true" checkreturn="true"
-			dir="${project.localRepositoryDirectory}"
-			command="git submodule --quiet foreach 'git config url.&quot;ssh://review.typo3.org:29418&quot;.pushInsteadOf git://git.typo3.org'" />
-		<exec logoutput="true" checkreturn="true"
-			dir="${project.localRepositoryDirectory}"
-			command="git submodule --quiet foreach 'git config user.name &quot;TYPO3 Release Team&quot;'" />
-		<exec logoutput="true" checkreturn="true"
-			dir="${project.localRepositoryDirectory}"
-			command="git submodule --quiet foreach 'git config user.email &quot;typo3v4@typo3.org&quot;'" />
 	</target>
 
 
@@ -320,13 +301,9 @@
 					command="git reset --hard origin/${repository-select.branch}" />
 			</then>
 		</if>
-
-		<exec logoutput="true" checkreturn="true"
-			dir="${repository-select.gitDirectory}"
-			command="git submodule update --init" />
 	</target>
 
-	<!-- this target does a "git tag" command for the main repository and its submodules -->
+	<!-- this target does a "git tag" command for the main repository -->
 	<target name="repository-typo3-tag">
 		<!-- only tag if the appropriate variables are set -->
 		<fail unless="repository-typo3-tag.tag" message="Property $repository-typo3-tag.tag is required." />
@@ -342,11 +319,6 @@
 			dir="${project.localRepositoryDirectory}"
 			command="git tag -a -f -m 'Tagged version ${repository-typo3-tag.version}' ${repository-typo3-tag.tag}" />
 
-		<!-- tagging each submodule was well -->
-		<exec logoutput="true" checkreturn="true"
-			dir="${project.localRepositoryDirectory}"
-			command="git submodule foreach 'git tag -a -f -m &quot;Tagged version ${repository-typo3-tag.version}&quot; ${repository-typo3-tag.tag}'" />
-
 		<!-- publish the tags to the remote repository, if the option was set -->
 		<if>
 			<equals arg1="${common.publish}" arg2="y" />
@@ -355,10 +327,6 @@
 				<exec logoutput="true" checkreturn="true"
 					dir="${project.localRepositoryDirectory}"
 					command="git push origin HEAD:refs/tags/${repository-typo3-tag.tag}" />
-				<!-- push tags for submodules (workspaces, dbal, ...) -->
-				<exec logoutput="true" checkreturn="true"
-					dir="${project.localRepositoryDirectory}"
-					command="git submodule foreach 'git push origin HEAD:refs/tags/${repository-typo3-tag.tag}'" />
 			</then>
 		</if>
 	</target>
