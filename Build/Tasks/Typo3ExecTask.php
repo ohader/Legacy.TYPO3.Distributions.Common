@@ -24,11 +24,20 @@ class Typo3ExecTask extends ExecTask {
 	 * @return void
 	 */
 	public function main() {
-		$return = $this->execute();
+		if (!$this->isApplicable()) {
+			return;
+		}
+
+		$this->prepare();
+		$this->buildCommand();
+		list($return, $output) = $this->executeCommand();
 
 		while ($return != 0 && $this->retryCount++ < $this->retry) {
-			$return = $this->retry();
+			$this->log('(Retry #' . $this->retryCount . ') Executing command: ' . $this->command);
+			list($return, $output) = $this->executeCommand();
 		}
+
+		$this->cleanup($return, $output);
 	}
 
 	/**
@@ -36,6 +45,7 @@ class Typo3ExecTask extends ExecTask {
 	 * that is exactly the reason for this additional method...
 	 *
 	 * @return integer Return code from execution.
+	 * @deprecated Not required anymore
 	 */
 	protected function retry() {
 		if ($this->dir !== null) {
