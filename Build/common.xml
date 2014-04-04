@@ -86,6 +86,7 @@
 		<echo message="isPackage: ${common.isPackage}" />
 
 		<echo message="nextVersion: ${common.info.nextVersion}" />
+		<echo message="nextComposerVersion: ${common.info.nextComposerVersion}" />
 		<echo message="nextTag: ${common.info.nextTag}" />
 		<echo message="currentVersion: ${common.info.currentVersion}" />
 		<echo message="currentTag: ${common.info.currentTag}" />

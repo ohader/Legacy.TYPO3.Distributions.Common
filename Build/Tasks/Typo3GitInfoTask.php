@@ -10,6 +10,8 @@ class Typo3GitInfoTask extends GitBaseTask {
 	const BRANCH_Pattern = 'TYPO3_\d+-\d+';
 	const VERSION_Pattern = '\d+-\d+';
 	const VERSION_Delimiter = '.';
+	const COMPOSER_BaseVersion = '(\d+\.\d+\.\d+)(.+)';
+	const COMPOSER_BaseVersionDelimiter = '-';
 
 	/**
 	 * @var string
@@ -195,6 +197,20 @@ class Typo3GitInfoTask extends GitBaseTask {
 		return $version;
 	}
 
+	private function convertToComposer($tag) {
+		$version = $this->convertToVersion($tag);
+
+		if (is_null($version) === FALSE) {
+			$version = preg_replace(
+				'/^' . self::COMPOSER_BaseVersion . '$/',
+				'${1}' . self::COMPOSER_BaseVersionDelimiter . '${2}',
+				$version
+			);
+		}
+
+		return $version;
+	}
+
 	private function convertToTag($version) {
 		$tag = NULL;
 
@@ -279,6 +295,7 @@ class Typo3GitInfoTask extends GitBaseTask {
 
 		$info['currentVersion'] = $this->convertToVersion($info['currentTag']);
 		$info['nextVersion'] = $this->convertToVersion($info['nextTag']);
+		$info['nextComposerVersion'] = $this->convertToComposer($info['nextTag']);
 
 		return $info;
 	}
