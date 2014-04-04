@@ -47,24 +47,35 @@
 		<!-- build Base -->
 		<phingcall target="base-execute" />
 
-		<!-- Blank and Dummy are created for ALL releases -->
-		<phingcall target="dummy-execute" />
-		<phingcall target="blank-execute" />
-
-		<!-- build Introduction if the branch is not outdated or if it's 4.5 LTS -->
+		<!-- Blank and Dummy are created for ALL releases lower than 6.2 -->
 		<if>
-			<or>
-				<isfalse value="${common.info.isOutdatedBranch}" />
-				<equals arg1="${common.major}" arg2="4.5" />
-			</or>
+			<isfalse value="${common.isPackage}" />
+			<then>
+				<phingcall target="dummy-execute" />
+				<phingcall target="blank-execute" />
+			</then>
+		</if>
+
+		<!-- build Introduction if version is lower than 6.2 and the branch is not outdated or if it's 4.5 LTS -->
+		<if>
+			<and>
+				<isfalse value="${common.isPackage}" />
+				<or>
+					<isfalse value="${common.info.isOutdatedBranch}" />
+					<equals arg1="${common.major}" arg2="4.5" />
+				</or>
+			</and>
 			<then>
 				<phingcall target="introduction-execute" />
 			</then>
 		</if>
 
-		<!-- build Government if the branch is not outdated -->
+		<!-- build Government if version is lower than 6.2 and the branch is not outdated -->
 		<if>
-			<isfalse value="${common.info.isOutdatedBranch}" />
+			<and>
+				<isfalse value="${common.isPackage}" />
+				<isfalse value="${common.info.isOutdatedBranch}" />
+			</and>
 			<then>
 				<phingcall target="government-execute" />
 			</then>

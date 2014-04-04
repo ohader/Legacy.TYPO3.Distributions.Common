@@ -81,6 +81,10 @@
 			</then>
 		</if>
 
+		<!-- Packages are only created if version is lower than 6.2 -->
+		<php expression="strnatcmp('${common.major}', '6.2') &gt; -1" returnProperty="common.isPackage" />
+		<echo message="isPackage: ${common.isPackage}" />
+
 		<echo message="nextVersion: ${common.info.nextVersion}" />
 		<echo message="nextTag: ${common.info.nextTag}" />
 		<echo message="currentVersion: ${common.info.currentVersion}" />

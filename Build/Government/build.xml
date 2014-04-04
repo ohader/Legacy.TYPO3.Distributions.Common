@@ -32,7 +32,7 @@
 		<then><import file="${build.basedir}/../common.xml" /></then>
 	</if>
 
-	<property name="government.resourcesRepository" value="git://git.typo3.org/TYPO3v4/Distributions/Government.git" />
+	<property name="government.resourcesRepository" value="git://git.typo3.org/TYPO3CMS/Distributions/Government.git" />
 	<property name="government.resourcesDirectory" value="${project.workDirectory}Resources/Government/" />
 	<property name="government.workDirectory" value="${project.workDirectory}Targets/Government/" />
 	<property name="government.apsStandardDirectory" value="${project.basedir}/ApsStandard/" />

@@ -32,7 +32,7 @@
 		<then><import file="${build.basedir}/../common.xml" /></then>
 	</if>
 
-	<property name="blank.resourcesRepository" value="git://git.typo3.org/TYPO3v4/Distributions/Blank.git" />
+	<property name="blank.resourcesRepository" value="git://git.typo3.org/TYPO3CMS/Distributions/Blank.git" />
 	<property name="blank.resourcesDirectory" value="${project.workDirectory}Resources/Blank/" />
 	<property name="blank.workDirectory" value="${project.workDirectory}Targets/Blank/" />
 
