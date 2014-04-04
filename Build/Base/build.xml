@@ -32,9 +32,6 @@
 		<then><import file="${build.basedir}/../common.xml" /></then>
 	</if>
 
-	<!-- Base repository contents are only required if version is lower than 6.2 -->
-	<property name="base.resourcesRepository" value="git://git.typo3.org/TYPO3CMS/Distributions/Base.git" />
-	<property name="base.resourcesDirectory" value="${project.workDirectory}Resources/Base/" />
 	<property name="base.workDirectory" value="${project.workDirectory}Targets/Base/" />
 
 	<target name="base" depends="common,project-initialize,base-execute">
@@ -71,22 +68,6 @@
 	<target name="base-execute">
 		<delete dir="${base.workDirectory}" quiet="true" />
 		<mkdir dir="${base.workDirectory}" />
-
-		<!-- Base repository contents are only required if version is lower than 6.2 -->
-		<if>
-			<isfalse value="${common.isPackage}" />
-			<then>
-				<delete dir="${base.resourcesDirectory}" quiet="true" />
-				<mkdir dir="${base.resourcesDirectory}" />
-
-				<phingcall target="repository-export">
-					<property name="repository-export.gitName" value="${common.info.branchName}" />
-					<property name="repository-export.gitNameDefault" value="master" />
-					<property name="repository-export.gitRepository" value="${base.resourcesRepository}" />
-					<property name="repository-export.directory" value="${base.resourcesDirectory}" />
-				</phingcall>
-			</then>
-		</if>
 
 		<if>
 			<equals arg1="${common.type}" arg2="snapshot" />
@@ -192,16 +173,6 @@
 			<property name="repository-dump.gitName" value="${base.gitName}" />
 			<property name="repository-dump.directory" value="${base.workBaseDirectory}" />
 		</phingcall>
-
-		<!-- Base repository contents are only required if version is lower than 6.2 -->
-		<if>
-			<isfalse value="${common.isPackage}" />
-			<then>
-				<copy todir="${base.workBaseDirectory}">
-					<fileset dir="${base.resourcesDirectory}" />
-				</copy>
-			</then>
-		</if>
 
 		<phingcall target="project-permissions">
 			<property name="project-permissions.directory" value="${base.workBaseDirectory}" />
