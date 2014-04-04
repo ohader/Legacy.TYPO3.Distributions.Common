@@ -146,12 +146,24 @@
 			<property name="repository-typo3-push.refresh" value="true" />
 		</phingcall>
 
-		<!-- create an accordant tag which will be used to create the package -->
+		<!-- Create old-style tag "TYPO3_6-2-0beta7" -->
 		<phingcall target="repository-typo3-tag">
 			<property name="repository-typo3-tag.tag" value="${common.info.nextTag}" />
 			<property name="repository-typo3-tag.branch" value="${common.info.branchName}" />
 			<property name="repository-typo3-tag.version" value="${common.info.nextVersion}" />
 		</phingcall>
+
+		<!-- Create composer-style tag "6.2.0beta7" in addition, starting with 6.2 -->
+		<if>
+			<istrue value="${common.isPackage}" />
+			<then>
+				<phingcall target="repository-typo3-tag">
+					<property name="repository-typo3-tag.tag" value="${common.info.nextVersion}" />
+					<property name="repository-typo3-tag.branch" value="${common.info.branchName}" />
+					<property name="repository-typo3-tag.version" value="${common.info.nextVersion}" />
+				</phingcall>
+			</then>
+		</if>
 
 		<!-- @todo Take care of creating new branches -->
 
