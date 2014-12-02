@@ -54,7 +54,7 @@
 			<not><isset property="common.major" /></not>
 			<then>
 				<input propertyName="common.major" defaultValue="6.2"
-					validArgs="4.1,4.2,4.3,4.4,4.5,4.6,4.7,6.0,6.1,6.2" message="Major version of the release" />
+					validArgs="4.1,4.2,4.3,4.4,4.5,4.6,4.7,6.0,6.1,6.2,7.0,7.1,7.2" message="Major version of the release" />
 			</then>
 		</if>
 		<if>
