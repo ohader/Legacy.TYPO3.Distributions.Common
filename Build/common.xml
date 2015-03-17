@@ -466,7 +466,7 @@
 		<if>
 			<equals arg1="${common.publish}" arg2="y" />
 			<then>
-				<property name="publish-sourceforge.fullPath" value="/home/frs/project/t/ty/typo3/TYPO3 Source and Dummy/${publish-sourceforge.directory}" />
+				<property name="publish-sourceforge.fullPath" value="/home/frs/project/typo3/TYPO3 Source and Dummy/${publish-sourceforge.directory}" />
 				<typo3convertwhitespaces property="publish-sourceforge.fullPath" />
 				<echo message="Publishing to ${publish-sourceforge.fullPath}" />
 
