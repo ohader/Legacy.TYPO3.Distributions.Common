@@ -29,7 +29,7 @@
 	<property name="git.submitApprovalCommand" value="ssh -p 29418 review.typo3.org gerrit review --verified +2 --code-review +2 --project Packages/TYPO3.CMS --message 'Auto-approved' --submit" />
 	<property name="git.pushUrl" value="ssh://review.typo3.org/Packages/TYPO3.CMS.git" />
 	<property name="git.pushTopic" value="/RELEASE" />
-	<property name="git.author" value="TYPO3 Release Team &lt;typo3v4@typo3.org&gt;" />
+	<property name="git.author" value="TYPO3 Release Team &lt;typo3cms@typo3.org&gt;" />
 
 	<property name="project.targetsDirectory" value="${build.basedir}/Targets/" />
 	<property name="project.workDirectory" value="${build.basedir}/Work/" />
@@ -279,7 +279,7 @@
 			command="git config user.name 'TYPO3 Release Team'" />
 		<exec logoutput="true" checkreturn="true"
 			dir="${project.localRepositoryDirectory}"
-			command="git config user.email 'typo3v4@typo3.org'" />
+			command="git config user.email 'typo3cms@typo3.org'" />
 
 		<!-- Commit Hooks -->
 		<exec logoutput="true" checkreturn="true"
