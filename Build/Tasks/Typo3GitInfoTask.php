@@ -10,7 +10,7 @@ class Typo3GitInfoTask extends GitBaseTask {
 	const BRANCH_Pattern = 'TYPO3_\d+-\d+';
 	const VERSION_Pattern = '\d+-\d+';
 	const VERSION_Delimiter = '.';
-	const COMPOSER_BaseVersion = '(\d+\.\d+\.\d+)(.+)';
+	const COMPOSER_BaseVersion = '(\d+\.\d+\.\d+)([^\d].+)';
 	const COMPOSER_BaseVersionDelimiter = '-';
 
 	/**
