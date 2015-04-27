@@ -83,7 +83,9 @@
 
 		<!-- Packages are only created if version is lower than 6.2 -->
 		<php expression="strnatcmp('${common.major}', '6.2') &gt; -1" returnProperty="common.isPackage" />
+		<php expression="strnatcmp('${common.major}', '7.2') &gt; -1" returnProperty="common.usesComposer" />
 		<echo message="isPackage: ${common.isPackage}" />
+		<echo message="usesComposer: ${common.usesComposer}" />
 
 		<echo message="nextVersion: ${common.info.nextVersion}" />
 		<echo message="nextComposerVersion: ${common.info.nextComposerVersion}" />
@@ -185,6 +187,10 @@
 			dir="${repository-dump.gitDirectory}"
 			command="git checkout-index -a --prefix=&quot;${repository-dump.directory}&quot;" />
 
+		<phingcall target="composer-install">
+			<property name="composer-install.directory" value="${repository-dump.directory}" />
+		</phingcall>
+
 		<delete includeemptydirs="true">
 			<fileset dir="${repository-dump.directory}" defaultexcludes="false">
 				<include name=".gitignore" />
@@ -266,6 +272,19 @@
 
 				<phingcall target="repository-initialize" />
 			</else>
+		</if>
+	</target>
+
+	<target name="composer-install">
+		<fail unless="composer-install.directory" message="Property $composer-install.directory is required." />
+
+		<if>
+			<istrue value="${common.usesComposer}" />
+			<then>
+				<exec logoutput="true" checkreturn="true"
+					dir="${composer-install.directory}"
+					command="composer install --no-dev -o" />
+			</then>
 		</if>
 	</target>
 
