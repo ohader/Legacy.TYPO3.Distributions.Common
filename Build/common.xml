@@ -84,8 +84,11 @@
 		<!-- Packages are only created if version is lower than 6.2 -->
 		<php expression="strnatcmp('${common.major}', '6.2') &gt; -1" returnProperty="common.isPackage" />
 		<php expression="strnatcmp('${common.major}', '7.2') &gt; -1" returnProperty="common.usesComposer" />
+		<php expression="strnatcmp('${common.major}', '8.0') &lt; 0" returnProperty="common.hasChangeLog" />
+
 		<echo message="isPackage: ${common.isPackage}" />
 		<echo message="usesComposer: ${common.usesComposer}" />
+		<echo message="hasChangeLog: ${common.hasChangeLog}" />
 
 		<echo message="nextVersion: ${common.info.nextVersion}" />
 		<echo message="nextComposerVersion: ${common.info.nextComposerVersion}" />

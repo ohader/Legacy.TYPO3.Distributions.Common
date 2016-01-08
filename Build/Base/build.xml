@@ -102,11 +102,17 @@
 			dir="${project.localRepositoryDirectory}"
 			command="git commit -a -m '[RELEASE] Release of TYPO3 ${base.versionName}' --author='${git.author}'" />
 
-		<!-- create the changelog with the previous version change commit -->
-		<phingcall target="repository-typo3-changelog">
-			<property name="repository-typo3-changelog.branch" value="${common.info.branchName}" />
-			<property name="repository-typo3-changelog.file" value="${project.localRepositoryDirectory}ChangeLog" />
-		</phingcall>
+		<if>
+			<!-- the ChangeLog file is only valid up to and including TYPO3 7 -->
+			<istrue value="${common.hasChangeLog}" />
+			<then>
+				<!-- create the ChangeLog with the previous version change commit -->
+				<phingcall target="repository-typo3-changelog">
+					<property name="repository-typo3-changelog.branch" value="${common.info.branchName}" />
+					<property name="repository-typo3-changelog.file" value="${project.localRepositoryDirectory}ChangeLog" />
+				</phingcall>
+			</then>
+		</if>
 
 		<!-- commit, but amend the changelog -->
 		<exec logoutput="true" checkreturn="true"
