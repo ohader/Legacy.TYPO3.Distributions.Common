@@ -30,6 +30,7 @@
 	<property name="git.pushUrl" value="ssh://review.typo3.org/Packages/TYPO3.CMS.git" />
 	<property name="git.pushTopic" value="/RELEASE" />
 	<property name="git.author" value="TYPO3 Release Team &lt;typo3cms@typo3.org&gt;" />
+	<property name="git.signingkey" value="59BC94C4" />
 
 	<property name="project.targetsDirectory" value="${build.basedir}/Targets/" />
 	<property name="project.workDirectory" value="${build.basedir}/Work/" />
@@ -104,6 +105,34 @@
 	<target name="project-md5">
 		<typo3filehash dir="${project.targetsDirectory}" returnProperty="project-md5.result" method="md5" />
 		<echo message="${project-md5.result}" />
+	</target>
+
+	<target name="project-release-file">
+		<fail unless="project-release-file.version" message="You must set the $project-release-file.version for this target" />
+
+		<exec logoutput="false" checkreturn="true"
+			dir="${project.targetsDirectory}"
+			outputProperty="project-release-file.md5"
+			command="md5sum *.tar.gz *.zip" />
+		<exec logoutput="false" checkreturn="true"
+			dir="${project.targetsDirectory}"
+			outputProperty="project-release-file.sha256"
+			command="shasum -a 256 *.tar.gz *.zip" />
+
+		<copy file="${common.basedir}/Assets/RELEASE.txt" tofile="${project.targetsDirectory}/RELEASE.raw">
+			<filterchain>
+				<replaceregexp>
+					<regexp pattern="##TYPO3_version##" replace="${project-release-file.version}" />
+					<regexp pattern="##MD5_checksums##" replace="${project-release-file.md5}" />
+					<regexp pattern="##SHA256_checksums##" replace="${project-release-file.sha256}" />
+				</replaceregexp>
+			</filterchain>
+		</copy>
+
+		<exec logoutput="true" checkreturn="true"
+			command="gpg --yes --digest-algo SHA256 -u ${git.signingkey} --clearsign --output ${project.targetsDirectory}/RELEASE.txt ${project.targetsDirectory}/RELEASE.raw" />
+
+		<delete file="${project.targetsDirectory}/RELEASE.raw" />
 	</target>
 
 	<target name="project-initialize">
@@ -344,10 +373,14 @@
 			<property name="repository-select.branch" value="${repository-typo3-tag.branch}" />
 		</phingcall>
 
+		<exec logoutput="true" checkreturn="true"
+			dir="${project.localRepositoryDirectory}"
+			command="git config user.signingkey '${git.signingkey}'" />
+
 		<!-- tagging the main project -->
 		<exec logoutput="true" checkreturn="true"
 			dir="${project.localRepositoryDirectory}"
-			command="git tag -a -f -m 'Tagged version ${repository-typo3-tag.version}' ${repository-typo3-tag.tag}" />
+			command="git tag -s -f -m 'Tagged version ${repository-typo3-tag.version}' ${repository-typo3-tag.tag}" />
 
 		<!-- publish the tags to the remote repository, if the option was set -->
 		<if>
@@ -479,6 +512,13 @@
 				<move file="${typo3-version-set.versionFile}.modified" tofile="${typo3-version-set.versionFile}" />
 			</then>
 		</if>
+	</target>
+
+	<target name="typo3-sign-file">
+		<fail unless="typo3-sign-file.filePath" message="Property $typo3-sign-file.filePath is required." />
+
+		<exec logoutput="true" checkreturn="true"
+			command="gpg --yes --digest-algo SHA256 -u ${git.signingkey} --output ${typo3-sign-file.filePath}.sig --detach-sig ${typo3-sign-file.filePath}" />
 	</target>
 
 	<!--

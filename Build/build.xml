@@ -82,6 +82,9 @@
 		</if>
 
 		<phingcall target="project-md5" />
+		<phingcall target="project-release-file">
+			<property name="project-release-file.version" value="${build.versionName}" />
+		</phingcall>
 
 		<phingcall target="publish-sourceforge">
 			<property name="publish-sourceforge.directory" value="TYPO3 ${build.versionName}" />

@@ -1,0 +1,14 @@
+================================================================================================
+Release of TYPO3 CMS ##TYPO3_version##
+================================================================================================
+
+MD5 checksums:
+##MD5_checksums##
+
+SHA256 checksums:
+##SHA256_checksums##
+
+Further details on the signing and hashing process of TYPO3 releases:
+https://docs.typo3.org/typo3cms/drafts/github/TYPO3Incubator/InfrastructureGuide/Releases/
+================================================================================================
+

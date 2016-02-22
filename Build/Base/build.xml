@@ -36,6 +36,10 @@
 
 	<target name="base" depends="common,project-initialize,base-execute">
 		<phingcall target="project-md5" />
+		<phingcall target="project-release-file">
+			<property name="project-release-file.version" value="${base.versionName}" />
+		</phingcall>
+
 		<phingcall target="publish-sourceforge">
 			<property name="publish-sourceforge.directory" value="TYPO3 ${base.versionName}" />
 		</phingcall>
@@ -193,5 +197,12 @@
 		<echo message="Creating ${base.packageName}.zip" />
 		<exec logoutput="true" checkreturn="true"
 			command="cd &quot;${base.workDirectory}&quot;; zip -rq9 &quot;${project.targetsDirectory}${base.packageName}.zip&quot; &quot;${base.prefixDirectory}&quot;" />
+
+		<foreach target="typo3-sign-file" param="typo3-sign-file.fileName" absparam="typo3-sign-file.filePath">
+			<fileset dir="${project.targetsDirectory}">
+				<include name="*.tar.gz" />
+				<include name="*.zip" />
+			</fileset>
+		</foreach>
 	</target>	
 </project>
