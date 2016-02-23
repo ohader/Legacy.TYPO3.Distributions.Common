@@ -130,7 +130,7 @@
 		</copy>
 
 		<exec logoutput="true" checkreturn="true"
-			command="gpg --yes --digest-algo SHA256 -u ${git.signingkey} --clearsign --output ${project.targetsDirectory}/RELEASE.txt ${project.targetsDirectory}/RELEASE.raw" />
+			command="gpg --yes --digest-algo SHA256 -u ${git.signingkey} --clearsign --output ${project.targetsDirectory}/RELEASE-${project-release-file.version}.txt ${project.targetsDirectory}/RELEASE.raw" />
 
 		<delete file="${project.targetsDirectory}/RELEASE.raw" />
 	</target>
