@@ -389,7 +389,7 @@
 				<!-- push tag for super project (Core) -->
 				<exec logoutput="true" checkreturn="true"
 					dir="${project.localRepositoryDirectory}"
-					command="git push origin HEAD:refs/tags/${repository-typo3-tag.tag}" />
+					command="git push origin ${repository-typo3-tag.tag}" />
 			</then>
 		</if>
 	</target>
