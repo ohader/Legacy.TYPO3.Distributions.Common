@@ -234,6 +234,13 @@
 				<include name="**/.git/" />
 				<include name="**/tests" />
 				<include name="**/tests/**" />
+				<include name="**/Test" />
+				<include name="**/Test/**" />
+				<include name="**/Tests" />
+				<include name="**/Tests/**" />
+				<include name="vendor/**/docs" />
+				<include name="vendor/**/docs/**" />
+				<include name="vendor/**/example.php" />
 				<include name=".svn" />
 				<include name="**/.svn" />
 				<include name="**/.svn/**" />
