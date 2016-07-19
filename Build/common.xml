@@ -228,19 +228,32 @@
 				<include name=".editorconfig" />
 				<include name=".gitignore" />
 				<include name=".gitmodules" />
+				<include name=".gitattributes" />
+				<include name=".gitreview" />
 				<include name="dynamicReturnTypeMeta.json" />
 				<include name="Build/" />
 				<include name="**/.gitignore" />
 				<include name="**/.git/" />
 				<include name="**/tests" />
 				<include name="**/tests/**" />
-				<include name="**/Test" />
-				<include name="**/Test/**" />
-				<include name="**/Tests" />
-				<include name="**/Tests/**" />
+				<include name="vendor/**/Test" />
+				<include name="vendor/**/Test/**" />
+				<include name="vendor/**/Tests" />
+				<include name="vendor/**/Tests/**" />
 				<include name="vendor/**/docs" />
 				<include name="vendor/**/docs/**" />
+				<include name="vendor/**/examples" />
+				<include name="vendor/**/examples/**" />
 				<include name="vendor/**/example.php" />
+				<include name="Packages/Libraries/**/Test" />
+				<include name="Packages/Libraries/**/Test/**" />
+				<include name="Packages/Libraries/**/Tests" />
+				<include name="Packages/Libraries/**/Tests/**" />
+				<include name="Packages/Libraries/**/docs" />
+				<include name="Packages/Libraries/**/docs/**" />
+				<include name="Packages/Libraries/**/examples" />
+				<include name="Packages/Libraries/**/examples/**" />
+				<include name="Packages/Libraries/**/example.php" />
 				<include name=".svn" />
 				<include name="**/.svn" />
 				<include name="**/.svn/**" />
@@ -250,6 +263,7 @@
 				<include name="*.orig" />
 				<include name="*~" />
 				<include name=".travis.yml" />
+				<include name=".appveyor.yml" />
 			</fileset>
 		</delete>
 	</target>
