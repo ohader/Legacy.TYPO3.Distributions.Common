@@ -236,6 +236,7 @@
 				<include name="**/.git/" />
 				<include name="**/tests" />
 				<include name="**/tests/**" />
+				<include name="components/" />
 				<include name="vendor/**/Test" />
 				<include name="vendor/**/Test/**" />
 				<include name="vendor/**/Tests" />
