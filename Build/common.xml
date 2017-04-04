@@ -230,7 +230,9 @@
 				<include name=".gitmodules" />
 				<include name=".gitattributes" />
 				<include name=".gitreview" />
+				<include name=".stylelintrc" />
 				<include name="dynamicReturnTypeMeta.json" />
+				<include name="bin/" />
 				<include name="Build/" />
 				<include name="**/.gitignore" />
 				<include name="**/.git/" />
